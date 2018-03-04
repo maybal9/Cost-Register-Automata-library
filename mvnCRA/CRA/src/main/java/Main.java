@@ -224,6 +224,8 @@ public class Main {
         ArrayList regsList = new ArrayList<Integer>(Arrays.asList(regs));
         int max = (int) Collections.max(regsList);
         ans &= (regs.length == numOfRegs) && (max <= numOfRegs);
+        return ans;
     }
+
 
 }

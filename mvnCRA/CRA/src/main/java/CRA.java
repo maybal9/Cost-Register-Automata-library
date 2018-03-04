@@ -1,4 +1,3 @@
-import javafx.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -20,7 +19,7 @@ abstract public class CRA<T> {
     private T eta;
 
     //neu - the output function: Q-->X*domain
-    private Rule<T>[] v;
+    private UpdateRuleList<T> v;
 
     //Delta - the extended transition function: (Q*Sigma)-->(Q*(Rule)^|X|), represented as a 2-dim array of
     //the pairs <Q, <Rule>Array = <(X,domain)>Array>
@@ -31,7 +30,7 @@ abstract public class CRA<T> {
 
     //constructor
     public CRA(String sigma, int numofstates, int[] AcceptingStates , int numofRegisters,
-               Rule<T>[] v, DeltaImage<T>[][] delta, T eta, boolean isCommutative){
+               UpdateRuleList<T> v, DeltaImage<T>[][] delta, T eta, boolean isCommutative){
         //init Sigma
         this.Sigma = sigma;
 
@@ -127,7 +126,7 @@ abstract public class CRA<T> {
         Integer finalState = finalConfig.getState();
         ArrayList<T> finalRegsState = finalConfig.getRegsState();
         if(isAcceptingState(finalState)){
-            Rule<T> finalRule = this.v[finalState];
+            Rule<T> finalRule = this.v.getRule(finalState);
             T finalChange = finalRule.getChange();
             Integer[] finalRegsOrder = finalRule.getRegisters();
             return superApply(finalRegsOrder,finalRegsState,finalChange);
@@ -139,10 +138,10 @@ abstract public class CRA<T> {
         // extracting delta(qi, regsState) = (qj, {<xi,n> | xi is the referenced reg, n is the addition})
         DeltaImage<T> image = this.delta[currConfig.getState()][calc(sigma)];
         Integer nextState = image.getToState();
-        Rule<T>[] rules = image.getUpdateRegsRules();
+        UpdateRuleList rules = image.getUpdateRegsRules();
         ArrayList<T> copyOfRegsState = new ArrayList<T>(currConfig.getRegsState().size());
         for(int i=0; i<this.Registers.size(); i++){
-            Rule<T> currRule = rules[i];
+            Rule<T> currRule = rules.getRule(i);
             T lhsRegOldVal = copyOfRegsState.get(i);
             T change = currRule.getChange();
             //dilemma: where to calculate the current reg state, in CRA or in apply func?
@@ -153,5 +152,6 @@ abstract public class CRA<T> {
         }
         return new Configuration<T>(nextState,copyOfRegsState);
     }
+
 
 }
