@@ -12,5 +12,6 @@ public class UpdateRuleList<T> {
         return this.updateRegsRules[i];
     }
 
+    public int size(){return this.updateRegsRules.length;    }
 
 }

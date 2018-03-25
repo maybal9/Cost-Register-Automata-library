@@ -1,5 +1,4 @@
 import java.util.ArrayList;
-import javafx.util.Pair;
 
 public class ACRA extends CRA<Integer>{
     //members:

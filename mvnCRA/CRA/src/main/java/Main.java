@@ -1,6 +1,5 @@
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import javafx.util.Pair;
 import java.io.*;
 import java.util.Arrays;
 import java.util.ArrayList;
@@ -10,10 +9,19 @@ import java.util.Scanner;
 public class Main {
 
     public static void main(String[] args) {
-        Gson gson = new GsonBuilder().create();
+        /*Gson gson = new GsonBuilder().create();
         Integer[] a = {1,1,0,0,1};
         Rule<Integer> r = new Rule<Integer>(a,3, true);
         gson.toJson(r,System.out);
+        */
+
+        ACRA m0 = buildACRA0();
+        System.out.println("if (wa) then |w| else |w|+1");
+        testWord(m0,"bba");
+        testWord(m0,"ba");
+        testWord(m0,"a");
+        testWord(m0,"babababa");
+        testWord(m0,"bbb");
 
     }
 
@@ -21,6 +29,31 @@ public class Main {
         Object ans = M.evaluate(w);
         if(ans!=null) System.out.println("the word "+ w +" is accepted by M and it's value is: "+ ans);
     }
+
+    public static ACRA buildACRA0(){
+        Rule<Integer>[] neuArr = new Rule[2];
+        Integer[] regsPart = {1};
+        Rule r1 = new Rule(regsPart,0,true);
+        Rule r2= new Rule(regsPart,1,true);
+        neuArr[0] = r1;
+        neuArr[1] = r2;
+        UpdateRuleList<Integer> neu = new UpdateRuleList<>(neuArr);
+        int[] F = {0,1};
+        DeltaImage<Integer>[][] delta = new DeltaImage[2][2];
+        Rule<Integer> r = new Rule(regsPart,1,true);
+        Rule<Integer>[] m = new Rule[1];
+        m[0] = r;
+        UpdateRuleList<Integer> u = new UpdateRuleList<>(m);
+        delta[0][0] = new DeltaImage<Integer>(0,u);
+        delta[0][1] = new DeltaImage<Integer>(1,u);
+        delta[1][0] = new DeltaImage<Integer>(0,u);
+        delta[1][1] = new DeltaImage<Integer>(1,u);
+        ACRA ans = new ACRA("ab",2,F,1,neu,delta);
+        return ans;
+    }
+
+
+
 
     //build ACRA from user
     /*public static ACRA buildACRA(){
@@ -178,7 +211,7 @@ public class Main {
 
     }
 
-    */
+
 
     public boolean validateSigma(String sigma){  return sigma.length() > 0;  }
 
@@ -227,5 +260,5 @@ public class Main {
         return ans;
     }
 
-
+*/
 }
