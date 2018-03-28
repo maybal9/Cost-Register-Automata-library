@@ -1,7 +1,7 @@
 public class DeltaImage<T> {
     //fields:
     private int toState;
-    private UpdateRuleList updateRegsRules;
+    private UpdateRuleList<T> updateRegsRules;
 
     //methods:
     public DeltaImage(int qj, UpdateRuleList a){
@@ -11,6 +11,5 @@ public class DeltaImage<T> {
 
     public int getToState(){return this.toState;}
 
-    public UpdateRuleList getUpdateRegsRules(){return this.updateRegsRules;}
-
+    public UpdateRuleList<T> getUpdateRegsRules(){return this.updateRegsRules;}
 }

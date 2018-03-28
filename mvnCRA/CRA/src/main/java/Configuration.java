@@ -24,7 +24,7 @@ public class Configuration<T> {
     private String printRegsList(){
         String ans = "";
         for(int i=0; i<this.getRegsState().size(); i++){
-            ans = ans +" regsList[i] is: " + this.getRegsState().get(i) + "\n";
+            ans = ans +" regsList["+i+"] is: " + this.getRegsState().get(i) + ", ";
         }
         return ans;
     }

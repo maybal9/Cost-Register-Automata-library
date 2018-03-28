@@ -43,7 +43,7 @@ abstract public class CRA<T> {
         for (int AcceptingState : AcceptingStates) this.States[AcceptingState] = true;
 
         //init Registers
-        this.Registers = new ArrayList<T>(numofRegisters);
+        this.Registers = new ArrayList<>(numofRegisters);
         int i=0;
         while(i<numofRegisters){
             this.Registers.add(eta);
@@ -60,6 +60,10 @@ abstract public class CRA<T> {
         this.eta = eta;
 
     } // end of constructor
+
+    private void printNumOfRegisters(){
+        System.out.println("num of regs is: "+ this.Registers.size());
+    }
 
     public void setRegisters(int i, T val){
         this.Registers.set(i,val);
@@ -114,7 +118,7 @@ abstract public class CRA<T> {
     //this in order to apply the values in their right order!!!
     private T nonCommSuperApply(Integer[] order, ArrayList<T> regsStateOriginal ,T change){
         T ans = this.eta;
-        ArrayList orderList = new ArrayList<Integer>(Arrays.asList(order));
+        ArrayList orderList = new ArrayList<>(Arrays.asList(order));
         int i = (int) Collections.max(orderList);
         int idxOfCurrReg = orderList.indexOf(i);
         while(i> 0 && idxOfCurrReg >= 0){
@@ -134,11 +138,11 @@ abstract public class CRA<T> {
 
     T evaluate(String w){
         //creates a copy of the regsState
-        ArrayList<T> copyOfRegsState = new ArrayList<T>(this.Registers);
+        ArrayList<T> copyOfRegsState = new ArrayList<>(this.Registers);
 
         //creates initial configuration with qo and regsState
         //Q: why send the copy of regState instead the original?
-        Configuration<T> currentConfig = new Configuration<T>(0,copyOfRegsState);
+        Configuration<T> currentConfig = new Configuration<>(0,copyOfRegsState);
 
         //loop: compute the next configuration with eval(sigma, currConfig)
         for(int indexOfSigma = 0; indexOfSigma<w.length(); indexOfSigma++){
@@ -147,6 +151,7 @@ abstract public class CRA<T> {
             //update original regsState after the change
             ArrayList<T> regsStatePostChange = currentConfig.getRegsState();
             setRegisters(regsStatePostChange);
+
         }
 
         //finished the run on w, now compute the final output
@@ -156,14 +161,20 @@ abstract public class CRA<T> {
 
         //branching: if finished in an acc. state or not and follow accordingly
         if(isAcceptingState(finalState)){
-            Rule<T> finalRule = this.v.getRule(finalState);
-            T finalChange = finalRule.getChange();
-            Integer[] finalRegsOrder = finalRule.getRegisters();
+
+            Rule<T> outputRule = this.v.getRule(finalState);
+
+            T finalChange = outputRule.getChange();
+            Integer[] finalRegsOrder = outputRule.getRegisters();
+            int regDest = outputRule.getRegDest();
 
             T ans = superApply(finalRegsOrder,finalRegsState,finalChange);
+            setRegisters(regDest,ans);
+            T val = this.Registers.get(regDest);
+
             //don't forget to reset the automaton!!!!
             resetRegs();
-            return ans;
+            return val;
         }
         else return null;
     }
@@ -171,57 +182,45 @@ abstract public class CRA<T> {
     //computes the next configuration according to current configuration and the current letter being read
     Configuration<T> evaluate(Configuration<T> currConfig, char sigma){
 
-        //System.out.println(currConfig.printConfig());
-
         // extracting delta(qi, regsState) = (qj, {<xi,n> | xi is the referenced reg, n is the addition})
         // gets the information for the next step from delta table
-        // get what needs to be done
         DeltaImage<T> image = this.delta[currConfig.getState()][calc(sigma)];
         Integer nextState = image.getToState();
-        UpdateRuleList rules = image.getUpdateRegsRules();
-
-        if(currConfig.getRegsState().get(0) == null){
-            System.out.println("HEY BITCH IM NULL");
-        }
+        UpdateRuleList<T> rules = image.getUpdateRegsRules();
 
         //get the current regsState
         ArrayList<T> regsStateOriginal = currConfig.getRegsState();
 
-        // information for debugging only
-//        int s = regsStateOriginal.size();
-//        System.out.println("s is: "+ s);
-
         // creates a copy of the regs states to change them without collisions
-        ArrayList<T> copyOfRegsState = new ArrayList<T>(regsStateOriginal);
+        ArrayList<T> copyOfRegsState = new ArrayList<>(regsStateOriginal);
 
-        // for each register, preform it's update rule
-        // read from original regsState, write into copy of regsState
-        for(int i=0; i<regsStateOriginal.size(); i++){
+        // for each rule, preform it. read from original regsState, write into copy of regsState
+        for(int i=0; i<rules.getSize(); i++){
             Rule<T> currRule = rules.getRule(i);
-
             T change = currRule.getChange();
+            int regDest = currRule.getRegDest();
+            Integer[] rhsRegsOrder = currRule.getRegisters();
 
             //dilemma: where to calculate the current reg state, in CRA or in apply func?
             //dilemma 2: where to consider the commutativity?
-
-            //debug:
-            //System.out.println("regVal[0] is: "+ currRule.getRegisters()[0]);
-
-            Integer[] rhsRegsOrder = currRule.getRegisters();
-            //debug:
-            //System.out.println("rhsRegsOrder[0] sent to apply is: "+ rhsRegsOrder[0]);
-
             T newVal = superApply(rhsRegsOrder,regsStateOriginal,change);
-            copyOfRegsState.set(i, newVal);
+            copyOfRegsState.set(regDest, newVal);
         }
-
-        return new Configuration<T>(nextState,copyOfRegsState);
+        return new Configuration<>(nextState,copyOfRegsState);
     }
 
     private void resetRegs(){
         for(int i=0; i<this.Registers.size(); i++){
             this.Registers.set(i,this.eta);
         }
+    }
+
+    private void printRegs(){
+        String ans = "";
+        for(int i=0; i<this.Registers.size(); i++){
+            ans = ans +" reg["+i+"] value is: " + this.Registers.get(i) + ", ";
+        }
+        System.out.println(ans);
     }
 
 }
