@@ -40,4 +40,6 @@ public class UpdateRuleList<T> {
         return this.size;
     }
 
+    public Rule<T>[] getUpdateRegsRules(){return this.updateRegsRules;}
+
 }
