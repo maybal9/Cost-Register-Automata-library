@@ -12,6 +12,9 @@ abstract public class CRA<T> {
     //States - the accepting and non-accepting states of M represented as a boolean array;
     private Boolean[] States;
 
+    //acceptingStates - for tests only
+    private int[] acceptingStates;
+
     //Registers - all registers represented as an Array<T>;
     private  ArrayList<T> Registers;
 
@@ -28,6 +31,32 @@ abstract public class CRA<T> {
     //commutativity flag
     private boolean isCommutative;
 
+    //getters
+
+    public String getSigma() {
+        return Sigma;
+    }
+
+    public Boolean[] getStates() {
+        return States;
+    }
+
+    public int[] getAcceptingStates(){
+        return acceptingStates;
+    }
+
+    public ArrayList<T> getRegisters() {
+        return Registers;
+    }
+
+    public UpdateRuleList<T> getV() {
+        return v;
+    }
+
+    public DeltaImage<T>[][] getDelta() {
+        return delta;
+    }
+
     //constructor
     public CRA(String sigma, int numofstates, int[] AcceptingStates , int numofRegisters,
                UpdateRuleList<T> v, DeltaImage<T>[][] delta, T eta, boolean isCommutative){
@@ -41,6 +70,12 @@ abstract public class CRA<T> {
         this.States = new Boolean[numofstates];
         for(int i=0; i<numofstates; i++) this.States[i] = false;
         for (int AcceptingState : AcceptingStates) this.States[AcceptingState] = true;
+
+        //init acceptingStates
+        this.acceptingStates = new int[AcceptingStates.length];
+        for(int i=0;i<AcceptingStates.length;i++){
+            this.acceptingStates[i] = AcceptingStates[i];
+        }
 
         //init Registers
         this.Registers = new ArrayList<>(numofRegisters);

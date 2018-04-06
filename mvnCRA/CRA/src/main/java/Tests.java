@@ -1,4 +1,4 @@
-import sun.awt.image.BadDepthException;
+
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -6,6 +6,14 @@ import java.util.Collections;
 
 public class Tests<T> {
 
+    public void testACRA(ACRA m) throws BadArgumentException{
+        isSigmaValid(m.getSigma());
+        isQValid(m.getStates().length);
+        isAcceptingStatesValid(m.getAcceptingStates(), m.getStates().length);
+        isRegistersValid(m.getRegisters().size());
+        isOutputValid(m.getV(),m.getStates().length ,m.getRegisters().size());
+        isDeltaValid(m.getDelta(), m.getStates().length, m.getSigma(), m.getRegisters().size());
+    }
 
     private void isSigmaValid(String sigma) throws BadArgumentException{
         String title = "Sigma Error: ";

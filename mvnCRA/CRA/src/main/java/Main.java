@@ -114,6 +114,12 @@ public class Main {
 
         //**
         ACRA ans = new ACRA("ab",2,F,numofregs,neu,delta);
+        Tests<Integer> t = new Tests<>();
+        try {
+            t.testACRA(ans);
+        } catch (BadArgumentException e) {
+            e.printStackTrace();
+        }
         return ans;
     }
 }
