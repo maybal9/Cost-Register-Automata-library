@@ -154,13 +154,14 @@ abstract public class CRA<T> {
     private T nonCommSuperApply(Integer[] order, ArrayList<T> regsStateOriginal ,T change){
         T ans = this.eta;
         ArrayList orderList = new ArrayList<>(Arrays.asList(order));
-        int i = (int) Collections.max(orderList);
-        int idxOfCurrReg = orderList.indexOf(i);
-        while(i> 0 && idxOfCurrReg >= 0){
+        int max = (int) Collections.max(orderList);
+        int counter = 1;
+        int idxOfCurrReg = orderList.indexOf(counter);
+        while(counter<=max){
             T regVal = regsStateOriginal.get(idxOfCurrReg);
-            ans = apply(regVal,ans);
-            i--;
-            idxOfCurrReg = orderList.indexOf(i);
+            ans = apply(ans,regVal);
+            counter++;
+            idxOfCurrReg = orderList.indexOf(counter);
         }
         return apply(ans, change);
     }
