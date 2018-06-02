@@ -1,3 +1,5 @@
+package helpers;
+
 public class UpdateRuleList<T> {
 
     private Rule<T>[] updateRegsRules;

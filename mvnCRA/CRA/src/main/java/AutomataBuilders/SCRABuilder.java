@@ -1,49 +1,54 @@
-//please insert a full delta function.
+package AutomataBuilders;//please insert a full delta function.
 //regs with no change denote "ri=ri";
 
-public class ACRABuilder {
+import helpers.DeltaImage;
+import helpers.Pair;
+import helpers.Rule;
+import helpers.UpdateRuleList;
+
+public class SCRABuilder {
 
     private String sigma = "";
     private int numOfStates = 0;
     private int numOfRegs = 0;
     int[] acceptingStates = null;
-    private Parser<Integer> p = null;
+    private Parser<String> p = null;
 
-    public ACRABuilder(){}
+    public SCRABuilder(){}
 
-    public ACRA buildACRA(String sigma,int numOfStates, int numOfRegs, int[] acceptingStates,
+    public SCRA buildSCRA(String sigma, int numOfStates, int numOfRegs, int[] acceptingStates,
                           Pair<Integer, String[]>[][] listOfUpdateRules, String[] listOfOutputRules){
 
         buildStaticVars(sigma, numOfStates, numOfRegs, acceptingStates);
         p = new Parser<>(this.numOfRegs);
 
         //create output function
-        UpdateRuleList<Integer> neu = buildUpdateRuleList(listOfOutputRules);
+        UpdateRuleList<String> neu = buildUpdateRuleList(listOfOutputRules);
 
         //create delta
-        DeltaImage<Integer>[][] delta = new DeltaImage[this.numOfStates][this.sigma.length()];
+        DeltaImage<String>[][] delta = new DeltaImage[this.numOfStates][this.sigma.length()];
         int qj;
         String[] updates;
         for(int q=0; q<numOfStates; q++){
             for(int s=0; s<this.sigma.length(); s++){
                 qj = listOfUpdateRules[q][s].getKey();
                 updates = listOfUpdateRules[q][s].getValue();
-                UpdateRuleList<Integer> l = buildUpdateRuleList(updates);
+                UpdateRuleList<String> l = buildUpdateRuleList(updates);
                 delta[q][s] = new DeltaImage<>(qj,l);
             }
         }
 
         //**
-        ACRA ans = new ACRA(this.sigma,this.numOfStates,this.acceptingStates,this.numOfRegs,neu,delta);
+        SCRA ans = new SCRA(this.sigma,this.numOfStates,this.acceptingStates,this.numOfRegs,neu,delta);
         Tests<Integer> t = new Tests<>();
 
-        try {
-            t.testACRA(ans);
-        } catch (BadArgumentException e) {
-            e.printStackTrace();
-        }
+//        try {
+//            t.testACRA(ans);
+//        } catch (helpers.BadArgumentException e) {
+//            e.printStackTrace();
+//        }
 
-        resetACRABuilder();
+        resetSCRABuilder();
         return ans;
     }
 
@@ -57,9 +62,9 @@ public class ACRABuilder {
         }
     }
 
-    private UpdateRuleList<Integer> buildUpdateRuleList(String[] rules){
-        UpdateRuleList<Integer> ans = new UpdateRuleList<>(this.numOfRegs);
-        Rule<Integer> r;
+    private UpdateRuleList<String> buildUpdateRuleList(String[] rules){
+        UpdateRuleList<String> ans = new UpdateRuleList<>(this.numOfRegs);
+        Rule<String> r;
         for(int i=0; i<rules.length; i++){
             r = p.parseRule(rules[i]);
             ans.add(r);
@@ -67,7 +72,7 @@ public class ACRABuilder {
         return ans;
     }
 
-    private void resetACRABuilder(){
+    private void resetSCRABuilder(){
         this.sigma="";
         this.numOfStates = 0;
         this.numOfRegs = 0;

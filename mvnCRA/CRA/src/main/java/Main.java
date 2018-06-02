@@ -1,17 +1,18 @@
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import java.io.*;
-import java.util.Arrays;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Scanner;
+import AutomataBuilders.Parser;
+import core.ACRA;
+import core.CRA;
+import core.SCRA;
+import helpers.BadArgumentException;
+import helpers.DeltaImage;
+import helpers.Rule;
+import helpers.UpdateRuleList;
 
 public class Main {
 
     public static void main(String[] args) {
         /*Gson gson = new GsonBuilder().create();
         Integer[] a = {1,1,0,0,1};
-        Rule<Integer> r = new Rule<Integer>(a,3, true);
+        helpers.Rule<Integer> r = new helpers.Rule<Integer>(a,3, true);
         gson.toJson(r,System.out);
         */
 
@@ -19,12 +20,25 @@ public class Main {
         testM0();
         System.out.println("");
         testM1();
+        System.out.println("");
+        testM2();
 
     }
 
     public static void testWord(CRA M, String w){
         Object ans = M.evaluate(w);
         if(ans!=null) System.out.println("the word "+ w +" is accepted by M and it's value is: "+ ans);
+    }
+
+    public static void testM2(){
+        SCRA m2 = buildSCRA2();
+        System.out.println("if (wa) then |w| else |w|+1");
+        System.out.println("**********************");
+        testWord(m0,"bba");
+        testWord(m0,"ba");
+        testWord(m0,"a");
+        testWord(m0,"babababa");
+        testWord(m0,"bbb");
     }
 
     public static void testM0(){
@@ -46,6 +60,10 @@ public class Main {
         testWord(m1,"ab");
         testWord(m1,"bbab");
         testWord(m1,"bb");
+    }
+
+    public static SCRA buildSCRA2(){
+
     }
 
     public static ACRA buildACRA0(){

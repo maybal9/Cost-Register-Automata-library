@@ -1,8 +1,12 @@
 
 
-import java.util.ArrayList;
+import core.ACRA;
+import helpers.BadArgumentException;
+import helpers.DeltaImage;
+import helpers.Rule;
+import helpers.UpdateRuleList;
+
 import java.util.Arrays;
-import java.util.Collections;
 
 public class Tests<T> {
 
@@ -112,7 +116,7 @@ public class Tests<T> {
                     try{
                         isOutputValid(delta[i][j].getUpdateRegsRules(), numOfStates, numOfRegs);
                     } catch(BadArgumentException e){
-                        msg = "delta["+i+"]["+j+"] UpdateRuleList is not valid: ";
+                        msg = "delta["+i+"]["+j+"] helpers.UpdateRuleList is not valid: ";
                         throw new BadArgumentException(title+msg+e.getMessage());
                     }
                 }
@@ -130,7 +134,7 @@ public class Tests<T> {
     }
 
     private void isRuleValid(Rule r, int numOfRegs, int numOfStates) throws BadArgumentException{
-        String title="Rule Error: ";
+        String title="helpers.Rule Error: ";
         String msg = "";
         try{
             isValidState(r.getRegDest(), numOfStates);
@@ -139,7 +143,7 @@ public class Tests<T> {
             throw new BadArgumentException(title+msg);
         }
         if(r.getRegisters().length!=numOfRegs){
-            msg = "invalid Rule" ;
+            msg = "invalid helpers.Rule" ;
             throw new BadArgumentException(title+msg);
         }
     }

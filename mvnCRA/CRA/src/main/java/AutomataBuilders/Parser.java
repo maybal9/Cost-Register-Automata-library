@@ -1,7 +1,10 @@
-//a class that holds various parsing methods:
+package AutomataBuilders;//a class that holds various parsing methods:
 //main parsing methods: parseRule, parseRegister,
 
-//creating an ACRA parser!!!
+import helpers.Pair;
+import helpers.Rule;
+
+//creating an core.ACRA parser!!!
 public class Parser<T> {
 
     int numOfRegs;
