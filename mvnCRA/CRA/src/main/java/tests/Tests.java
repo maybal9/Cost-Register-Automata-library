@@ -1,4 +1,4 @@
-
+package tests;
 
 import core.ACRA;
 import helpers.BadArgumentException;

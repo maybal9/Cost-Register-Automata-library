@@ -1,26 +1,29 @@
-package AutomataBuilders;//please insert a full delta function.
+package AutomataBuilders;
+//please insert a full delta function.
 //regs with no change denote "ri=ri";
 
+import core.CRA;
+import core.SCRA;
 import helpers.DeltaImage;
 import helpers.Pair;
 import helpers.Rule;
 import helpers.UpdateRuleList;
+import tests.Tests;
 
-public class SCRABuilder {
+public class SCRABuilder<T> {
 
     private String sigma = "";
     private int numOfStates = 0;
     private int numOfRegs = 0;
-    int[] acceptingStates = null;
-    private Parser<String> p = null;
+    private int[] acceptingStates = null;
+    private Parser p = null;
 
-    public SCRABuilder(){}
 
     public SCRA buildSCRA(String sigma, int numOfStates, int numOfRegs, int[] acceptingStates,
-                          Pair<Integer, String[]>[][] listOfUpdateRules, String[] listOfOutputRules){
+                            Pair<Integer, String[]>[][] listOfUpdateRules, String[] listOfOutputRules){
 
         buildStaticVars(sigma, numOfStates, numOfRegs, acceptingStates);
-        p = new Parser<>(this.numOfRegs);
+        p = new ConcatParser(this.numOfRegs);
 
         //create output function
         UpdateRuleList<String> neu = buildUpdateRuleList(listOfOutputRules);
@@ -40,15 +43,14 @@ public class SCRABuilder {
 
         //**
         SCRA ans = new SCRA(this.sigma,this.numOfStates,this.acceptingStates,this.numOfRegs,neu,delta);
-        Tests<Integer> t = new Tests<>();
-
+//        Tests<Integer> t = new Tests<>();
 //        try {
 //            t.testACRA(ans);
 //        } catch (helpers.BadArgumentException e) {
 //            e.printStackTrace();
 //        }
 
-        resetSCRABuilder();
+        resetCRABuilder();
         return ans;
     }
 
@@ -72,7 +74,7 @@ public class SCRABuilder {
         return ans;
     }
 
-    private void resetSCRABuilder(){
+    private void resetCRABuilder(){
         this.sigma="";
         this.numOfStates = 0;
         this.numOfRegs = 0;

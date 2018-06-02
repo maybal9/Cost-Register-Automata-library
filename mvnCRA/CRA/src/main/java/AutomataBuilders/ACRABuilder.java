@@ -1,23 +1,25 @@
 package AutomataBuilders;//please insert a full delta function.
 //regs with no change denote "ri=ri";
 
+import core.ACRA;
 import helpers.*;
+import tests.Tests;
+
 
 public class ACRABuilder {
 
     private String sigma = "";
     private int numOfStates = 0;
     private int numOfRegs = 0;
-    int[] acceptingStates = null;
-    private Parser<Integer> p = null;
+    private int[] acceptingStates = null;
+    private Parser p = null;
 
-    public ACRABuilder(){}
 
     public ACRA buildACRA(String sigma, int numOfStates, int numOfRegs, int[] acceptingStates,
                           Pair<Integer, String[]>[][] listOfUpdateRules, String[] listOfOutputRules){
 
         buildStaticVars(sigma, numOfStates, numOfRegs, acceptingStates);
-        p = new Parser<>(this.numOfRegs);
+        p = new AdditiveParser(this.numOfRegs);
 
         //create output function
         UpdateRuleList<Integer> neu = buildUpdateRuleList(listOfOutputRules);

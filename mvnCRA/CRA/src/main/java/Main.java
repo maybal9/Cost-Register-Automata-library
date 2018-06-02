@@ -1,4 +1,4 @@
-import AutomataBuilders.Parser;
+import AutomataBuilders.AdditiveParser;
 import core.ACRA;
 import core.CRA;
 import core.SCRA;
@@ -6,6 +6,7 @@ import helpers.BadArgumentException;
 import helpers.DeltaImage;
 import helpers.Rule;
 import helpers.UpdateRuleList;
+import tests.Tests;
 
 public class Main {
 
@@ -90,7 +91,7 @@ public class Main {
 
     public static ACRA buildACRA1(){
         int numofregs = 2;
-        Parser<Integer> p = new Parser<>(numofregs);
+        AdditiveParser p = new AdditiveParser(numofregs);
         //**
         String rule1 = "r0=r0+3";
         String rule2 = "r1=r1+5";

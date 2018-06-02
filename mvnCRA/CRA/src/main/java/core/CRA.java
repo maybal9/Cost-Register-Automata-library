@@ -9,17 +9,16 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 
-abstract public class CRA<T> {
-    //fields:
-
-    //Sigma - the Alephhbet represented as a String;
-    protected String Sigma;
+abstract public class CRA<T> extends Automaton{
+    /**fields inherited from Automaton:
+     protected String Sigma;
+     protected int numOfStates;
+     protected int q0;
+     protected Integer[] acceptingStates;
+     */
 
     //States - the accepting and non-accepting states of M represented as a boolean array;
     protected Boolean[] States;
-
-    //acceptingStates - for tests only
-    protected int[] acceptingStates;
 
     //Registers - all registers represented as an Array<T>;
     protected  ArrayList<T> Registers;
@@ -39,18 +38,6 @@ abstract public class CRA<T> {
 
     //getters
 
-    public String getSigma() {
-        return Sigma;
-    }
-
-    public Boolean[] getStates() {
-        return States;
-    }
-
-    public int[] getAcceptingStates(){
-        return acceptingStates;
-    }
-
     public ArrayList<T> getRegisters() {
         return Registers;
     }
@@ -66,22 +53,11 @@ abstract public class CRA<T> {
     //constructor
     public CRA(String sigma, int numofstates, int[] AcceptingStates , int numofRegisters,
                UpdateRuleList<T> v, DeltaImage<T>[][] delta, T eta, boolean isCommutative){
-        //init Sigma
-        this.Sigma = sigma;
+
+        super(sigma,numofstates,AcceptingStates);
 
         //init commutativity flag
         this.isCommutative = isCommutative;
-
-        //init States
-        this.States = new Boolean[numofstates];
-        for(int i=0; i<numofstates; i++) this.States[i] = false;
-        for (int AcceptingState : AcceptingStates) this.States[AcceptingState] = true;
-
-        //init acceptingStates
-        this.acceptingStates = new int[AcceptingStates.length];
-        for(int i=0;i<AcceptingStates.length;i++){
-            this.acceptingStates[i] = AcceptingStates[i];
-        }
 
         //init Registers
         this.Registers = new ArrayList<>(numofRegisters);
@@ -119,11 +95,11 @@ abstract public class CRA<T> {
 
 
     //private methods:
-    protected int calc(char c){ return this.Sigma.indexOf(c);}
-    protected boolean isAcceptingState(int k){return States[k]; }
+    private int calc(char c){ return this.Sigma.indexOf(c);}
+    private boolean isAcceptingState(int k){return super.States[k]; }
 
     //superApply. meant to encapsulate commutative apply and non-commutative apply
-    protected T superApply(Integer[] rhsRegsOrder, ArrayList<T> regsStateOriginal ,T change){
+    private T superApply(Integer[] rhsRegsOrder, ArrayList<T> regsStateOriginal, T change){
 
         //if operation is commutative then recursively apply on positive integers
         //gets: [1,1,0,0,1] return: apply(x,apply(y,apply(u,apply(eta,change)))))

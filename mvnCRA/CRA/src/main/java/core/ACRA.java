@@ -14,7 +14,7 @@ public class ACRA extends CRA<Integer>{
 
     //methods:
     //consider recursive apply func
-    Integer apply(Integer rhsRegVal, Integer change) {
+    protected Integer apply(Integer rhsRegVal, Integer change) {
         return rhsRegVal + change;
     }
 

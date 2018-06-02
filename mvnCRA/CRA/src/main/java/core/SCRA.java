@@ -11,7 +11,7 @@ public class SCRA extends CRA<String> {
     }
 
     @Override
-    public String apply(String rhsRegVal, String change) {
+    protected String apply(String rhsRegVal, String change) {
         return rhsRegVal+change;
     }
 }
