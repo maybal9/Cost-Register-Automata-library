@@ -17,6 +17,7 @@ public class Tests<T> {
         isRegistersValid(m.getRegisters().size());
         isOutputValid(m.getV(),m.getStates().length ,m.getRegisters().size());
         isDeltaValid(m.getDelta(), m.getStates().length, m.getSigma(), m.getRegisters().size());
+        isCopyless(m);
     }
 
     private void isSigmaValid(String sigma) throws BadArgumentException{
@@ -146,5 +147,35 @@ public class Tests<T> {
             msg = "invalid helpers.Rule" ;
             throw new BadArgumentException(title+msg);
         }
+    }
+
+    private void isCopyless(ACRA m) throws BadArgumentException{
+        boolean copyFlag = true;
+        int[] copyCheck = new int[m.getRegisters().size()];
+        for(int a=0; a<copyCheck.length; a++){
+            copyCheck[a]=0;
+        }
+        for(int i=0; i<m.getDelta().length;i++){
+            for(int j=0; j<m.getDelta()[0].length;j++){
+                for(Rule r: m.getDelta()[i][j].getUpdateRegsRules().getUpdateRegsRules()){
+                    for(int reg: r.getRegisters()){
+                        copyCheck[reg]++;
+                    }
+                    copyFlag = checkCopy(copyCheck);
+                }
+                copyFlag = checkCopy(copyCheck);
+            }
+        }
+        if(!copyFlag){
+            throw new BadArgumentException("Not Copyless");
+        }
+    }
+
+    private boolean checkCopy(int[] a){
+        boolean ans = true;
+        for(int reg: a){
+            ans = ans & (reg<2);
+        }
+        return ans;
     }
 }

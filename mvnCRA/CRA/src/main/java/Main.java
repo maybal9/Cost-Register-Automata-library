@@ -1,4 +1,5 @@
 import AutomataBuilders.AdditiveParser;
+import AutomataBuilders.SCRABuilder;
 import core.ACRA;
 import core.CRA;
 import core.SCRA;
@@ -11,18 +12,12 @@ import tests.Tests;
 public class Main {
 
     public static void main(String[] args) {
-        /*Gson gson = new GsonBuilder().create();
-        Integer[] a = {1,1,0,0,1};
-        helpers.Rule<Integer> r = new helpers.Rule<Integer>(a,3, true);
-        gson.toJson(r,System.out);
-        */
-
         System.out.println("");
-        testM0();
+        testA0();
         System.out.println("");
-        testM1();
+        testA1();
         System.out.println("");
-        testM2();
+        testS0();
 
     }
 
@@ -31,18 +26,7 @@ public class Main {
         if(ans!=null) System.out.println("the word "+ w +" is accepted by M and it's value is: "+ ans);
     }
 
-    public static void testM2(){
-        SCRA m2 = buildSCRA2();
-        System.out.println("if (wa) then |w| else |w|+1");
-        System.out.println("**********************");
-        testWord(m0,"bba");
-        testWord(m0,"ba");
-        testWord(m0,"a");
-        testWord(m0,"babababa");
-        testWord(m0,"bbb");
-    }
-
-    public static void testM0(){
+    public static void testA0(){
         ACRA m0 = buildACRA0();
         System.out.println("if (wa) then |w| else |w|+1");
         System.out.println("**********************");
@@ -53,7 +37,7 @@ public class Main {
         testWord(m0,"bbb");
     }
 
-    public static void testM1(){
+    public static void testA1(){
         ACRA m1 = buildACRA1();
         System.out.println("if (wa) then 3#a else 5#b");
         System.out.println("**********************");
@@ -63,9 +47,17 @@ public class Main {
         testWord(m1,"bb");
     }
 
-    public static SCRA buildSCRA2(){
-
+    public static void testS0(){
+        SCRA m2 = buildSCRA0();
+        System.out.println("NAME");
+        System.out.println("**********************");
+        testWord(m2,"bba");
+        testWord(m2,"ba");
+        testWord(m2,"a");
+        testWord(m2,"babababa");
+        testWord(m2,"bbb");
     }
+
 
     public static ACRA buildACRA0(){
         Rule<Integer>[] neuArr = new Rule[2];
@@ -140,6 +132,11 @@ public class Main {
             e.printStackTrace();
         }
         return ans;
+    }
+
+    public static SCRA buildSCRA0(){
+        SCRABuilder s = new SCRABuilder();
+        return s.buildSCRA();
     }
 
 }

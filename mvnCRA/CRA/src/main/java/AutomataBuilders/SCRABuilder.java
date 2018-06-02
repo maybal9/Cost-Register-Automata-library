@@ -10,7 +10,7 @@ import helpers.Rule;
 import helpers.UpdateRuleList;
 import tests.Tests;
 
-public class SCRABuilder<T> {
+public class SCRABuilder {
 
     private String sigma = "";
     private int numOfStates = 0;
