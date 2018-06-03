@@ -22,7 +22,7 @@ public class Main {
     }
 
     public static void testWord(CRA M, String w){
-        Object ans = M.evaluate(w);
+        Object ans = M.evaluate(w).getKey();
         if(ans!=null) System.out.println("the word "+ w +" is accepted by M and it's value is: "+ ans);
     }
 

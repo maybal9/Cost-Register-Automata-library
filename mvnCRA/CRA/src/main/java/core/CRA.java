@@ -1,9 +1,6 @@
 package core;
 
-import helpers.Configuration;
-import helpers.DeltaImage;
-import helpers.Rule;
-import helpers.UpdateRuleList;
+import helpers.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -154,7 +151,7 @@ abstract public class CRA<T> extends Automaton{
 
     //evaluate functions of Automaton!!!
 
-    public T evaluate(String w){
+    public Pair<T,ArrayList<T>> evaluate(String w){
         //creates a copy of the regsState
         ArrayList<T> copyOfRegsState = new ArrayList<>(this.Registers);
 
@@ -188,11 +185,12 @@ abstract public class CRA<T> extends Automaton{
 
             T ans = superApply(finalRegsOrder,finalRegsState,finalChange);
             setRegisters(regDest,ans);
+            ArrayList<T> finalRegsVal = getRegisters();
             T val = this.Registers.get(regDest);
 
-            //don't forget to reset the automaton!!!!
+           //don't forget to reset the automaton!!!!
             resetRegs();
-            return val;
+            return new Pair<>(val,finalRegsVal);
         }
         else return null;
     }
