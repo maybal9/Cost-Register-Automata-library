@@ -39,5 +39,9 @@ public class DFA extends Automaton{
         return super.States[currentState];
     }
 
+    public int[][] getDelta(){
+        return this.Delta;
+    }
+
 }
 

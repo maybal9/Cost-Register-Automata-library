@@ -34,15 +34,12 @@ abstract public class CRA<T> extends Automaton{
     protected boolean isCommutative;
 
     //getters
-
     public ArrayList<T> getRegisters() {
         return Registers;
     }
-
     public UpdateRuleList<T> getV() {
         return v;
     }
-
     public DeltaImage<T>[][] getDelta() {
         return delta;
     }
@@ -148,9 +145,7 @@ abstract public class CRA<T> extends Automaton{
     //abstract method: apply - meant for subclasses of core.CRA to implement according to type
     protected abstract T apply(T rhsRegVal, T change);
 
-
     //evaluate functions of Automaton!!!
-
     public Pair<T,ArrayList<T>> evaluate(String w){
         //creates a copy of the regsState
         ArrayList<T> copyOfRegsState = new ArrayList<>(this.Registers);
@@ -237,6 +232,20 @@ abstract public class CRA<T> extends Automaton{
             ans = ans +" reg["+i+"] value is: " + this.Registers.get(i) + ", ";
         }
         System.out.println(ans);
+    }
+
+    private int getNextState(int thisState, char c){
+        return this.delta[thisState][super.Sigma.indexOf(c)].getToState();
+    }
+
+    public boolean belongs(String w){
+        int currentState = q0;
+        int i=0;
+        while(i<w.length()){
+            currentState = getNextState(currentState, w.charAt(i));
+            ++i;
+        }
+        return super.States[currentState];
     }
 
 }

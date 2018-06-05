@@ -65,4 +65,6 @@ public abstract class Automaton {
     public int[] getAcceptingStates(){
         return this.acceptingStates;
     }
+
+
 }
