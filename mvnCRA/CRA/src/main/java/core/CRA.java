@@ -6,13 +6,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 
-abstract public class CRA<T> extends Automaton{
-    /**fields inherited from Automaton:
+abstract public class CRA<T> extends DFA{
+
+    /** members
+    inherited from Automaton:
      protected String Sigma;
      protected int numOfStates;
      protected int q0;
-     protected Integer[] acceptingStates;
-     */
+     protected Integer[] acceptingStates; */
 
     //States - the accepting and non-accepting states of M represented as a boolean array;
     protected Boolean[] States;
@@ -33,18 +34,8 @@ abstract public class CRA<T> extends Automaton{
     //commutativity flag
     protected boolean isCommutative;
 
-    //getters
-    public ArrayList<T> getRegisters() {
-        return Registers;
-    }
-    public UpdateRuleList<T> getV() {
-        return v;
-    }
-    public DeltaImage<T>[][] getDelta() {
-        return delta;
-    }
 
-    //constructor
+    /**constructor*/
     public CRA(String sigma, int numofstates, int[] AcceptingStates , int numofRegisters,
                UpdateRuleList<T> v, DeltaImage<T>[][] delta, T eta, boolean isCommutative){
 
@@ -72,25 +63,8 @@ abstract public class CRA<T> extends Automaton{
 
     } // end of constructor
 
-    private void printNumOfRegisters(){
-        System.out.println("num of regs is: "+ this.Registers.size());
-    }
-
-    public void setRegisters(int i, T val){
-        this.Registers.set(i,val);
-    }
-
-    public void setRegisters(ArrayList<T> other){
-        for(int i=0; i<other.size(); i++) {
-            T val = other.get(i);
-            this.Registers.set(i,val);
-        }
-    }
-
-
-    //private methods:
-    private int calc(char c){ return this.Sigma.indexOf(c);}
-    private boolean isAcceptingState(int k){return super.States[k]; }
+    /**methods*/
+    /**essential functions*/
 
     //superApply. meant to encapsulate commutative apply and non-commutative apply
     private T superApply(Integer[] rhsRegsOrder, ArrayList<T> regsStateOriginal, T change){
@@ -146,7 +120,7 @@ abstract public class CRA<T> extends Automaton{
     protected abstract T apply(T rhsRegVal, T change);
 
     //evaluate functions of Automaton!!!
-    public Pair<T,ArrayList<T>> evaluate(String w){
+    public ArrayList<T> evaluate(String w){
         //creates a copy of the regsState
         ArrayList<T> copyOfRegsState = new ArrayList<>(this.Registers);
 
@@ -185,7 +159,7 @@ abstract public class CRA<T> extends Automaton{
 
            //don't forget to reset the automaton!!!!
             resetRegs();
-            return new Pair<>(val,finalRegsVal);
+            return finalRegsVal;
         }
         else return null;
     }
@@ -220,6 +194,30 @@ abstract public class CRA<T> extends Automaton{
         return new Configuration<>(nextState,copyOfRegsState);
     }
 
+    /**help functions*/
+    //getters
+    public ArrayList<T> getRegisters() { return Registers; }
+
+    public UpdateRuleList<T> getV() {  return v; }
+
+    public DeltaImage<T>[][] getDelta() { return delta; }
+
+    /**miscellaneous*/
+    private void printNumOfRegisters(){System.out.println("num of regs is: "+ this.Registers.size());}
+
+    public void setRegisters(int i, T val){this.Registers.set(i,val); }
+
+    public void setRegisters(ArrayList<T> other){
+        for(int i=0; i<other.size(); i++) {
+            T val = other.get(i);
+            this.Registers.set(i,val);
+        }
+    }
+
+    private int calc(char c){ return this.Sigma.indexOf(c);}
+
+    public boolean isAcceptingState(int k){return super.isAcceptingState(k); }
+
     protected void resetRegs(){
         for(int i=0; i<this.Registers.size(); i++){
             this.Registers.set(i,this.eta);
@@ -232,20 +230,6 @@ abstract public class CRA<T> extends Automaton{
             ans = ans +" reg["+i+"] value is: " + this.Registers.get(i) + ", ";
         }
         System.out.println(ans);
-    }
-
-    private int getNextState(int thisState, char c){
-        return this.delta[thisState][super.Sigma.indexOf(c)].getToState();
-    }
-
-    public boolean belongs(String w){
-        int currentState = q0;
-        int i=0;
-        while(i<w.length()){
-            currentState = getNextState(currentState, w.charAt(i));
-            ++i;
-        }
-        return super.States[currentState];
     }
 
 }

@@ -12,17 +12,17 @@ import tests.Tests;
 public class Main {
 
     public static void main(String[] args) {
-        System.out.println("");
-        testA0();
-        System.out.println("");
-        testA1();
-        System.out.println("");
-        testS0();
+//        System.out.println("");
+//        testA0();
+//        System.out.println("");
+//        testA1();
+//        System.out.println("");
+//        testS0();
 
     }
 
     public static void testWord(CRA M, String w){
-        Object ans = M.evaluate(w).getKey();
+        Object ans = M.evaluate(w);
         if(ans!=null) System.out.println("the word "+ w +" is accepted by M and it's value is: "+ ans);
     }
 
@@ -132,11 +132,6 @@ public class Main {
             e.printStackTrace();
         }
         return ans;
-    }
-
-    public static SCRA buildSCRA0(){
-        SCRABuilder s = new SCRABuilder();
-        return s.buildSCRA();
     }
 
 }
