@@ -6,7 +6,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-public abstract class DFA extends Automaton{
+public class DFA extends Automaton{
 
     /** members **/
     private int[][] Delta;

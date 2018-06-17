@@ -56,7 +56,6 @@ public abstract class Automaton<T> {
         return this.G.BFS(q0,lst);
     }
 
-    public abstract Object evaluate(String w);
     public abstract boolean belongs(String w);
 
     public String getSigma() { return this.Sigma; }
