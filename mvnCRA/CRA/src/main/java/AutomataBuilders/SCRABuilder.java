@@ -59,16 +59,14 @@ public class SCRABuilder {
         this.numOfStates = numOfStates;
         this.numOfRegs = numOfRegs;
         this.acceptingStates = new int[acceptingStates.length];
-        for(int i=0; i<acceptingStates.length; i++){
-            this.acceptingStates[i] = acceptingStates[i];
-        }
+        System.arraycopy(acceptingStates, 0, this.acceptingStates, 0, acceptingStates.length);
     }
 
     private UpdateRuleList<String> buildUpdateRuleList(String[] rules){
         UpdateRuleList<String> ans = new UpdateRuleList<>(this.numOfRegs);
         Rule<String> r;
-        for(int i=0; i<rules.length; i++){
-            r = p.parseRule(rules[i]);
+        for (String rule : rules) {
+            r = p.parseRule(rule);
             ans.add(r);
         }
         return ans;

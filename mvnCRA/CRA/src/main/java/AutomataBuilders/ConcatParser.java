@@ -8,6 +8,7 @@ import helpers.Rule;
 public class ConcatParser implements Parser {
 
     private int numOfRegs;
+    private String delimiter = "*";
 
     public ConcatParser(int n){
         this.numOfRegs = n;
@@ -49,15 +50,14 @@ public class ConcatParser implements Parser {
         }
     }
 
-    //expecting a string in the form: "rj+rk+..+d", no dups
-    private Pair<Integer[],Integer> parseRightHandSideInRule(String s){
-        String delimiter = "*";
+    //expecting a string in the form: "rj*rk*..*d", no dups
+    private Pair<Integer[],String> parseRightHandSideInRule(String s){
 
         //extract change as last argument of rule
         int lastIdxOfDel = s.lastIndexOf(delimiter);
         String change = s.substring(lastIdxOfDel+1);
         String trimChange = trimSpacesInEdges(change);
-        int changeVal = Integer.parseInt(trimChange);
+        String changeVal = trimChange;
 
 
         //extract all registers in rule
@@ -78,14 +78,15 @@ public class ConcatParser implements Parser {
         String del = "=";
         int equalSignIndex = s.indexOf(del);
 
-        //got: "ri"
-        if(equalSignIndex<0){
-            String trim = trimSpacesInEdges(s);
+        //got: "ri=ri"
+        if(s.lastIndexOf(delimiter)<0){
+            String cutRule = s.substring(0,equalSignIndex);
+            String trim = trimSpacesInEdges(cutRule);
             int regDest = parseRegister(trim);
             Integer[] self = new Integer[1];
             self[0] = regDest;
             Integer[] rep = createRepresentingRegOrder(self,numOfRegs);
-            return new Rule<>(regDest, rep, 0, true);
+            return new Rule<>(regDest, rep, "", false);
         }
 
         //parse LHS of rule
@@ -96,10 +97,10 @@ public class ConcatParser implements Parser {
         //parse RHS of rule
         String RHS = s.substring(equalSignIndex + 1);
         String trimRHS = trimSpacesInEdges(RHS);
-        Pair<Integer[], Integer> grammarRule = parseRightHandSideInRule(trimRHS);
+        Pair<Integer[], String> grammarRule = parseRightHandSideInRule(trimRHS);
 
         //create a new rule
-        Rule<Integer> r = new Rule<>(regToPlaceIn, grammarRule.getKey(), grammarRule.getValue(), true);
+        Rule<String> r = new Rule<>(regToPlaceIn, grammarRule.getKey(), grammarRule.getValue(), false);
 
         return r;
     }

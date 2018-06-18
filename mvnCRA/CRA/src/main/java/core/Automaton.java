@@ -1,5 +1,4 @@
 package core;
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import helpers.Graph;
 
 import java.util.ArrayList;

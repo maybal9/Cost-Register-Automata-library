@@ -135,7 +135,6 @@ abstract public class CRA<T> extends DFA{
             //update original regsState after the change
             ArrayList<T> regsStatePostChange = currentConfig.getRegsState();
             setRegisters(regsStatePostChange);
-
         }
 
         //finished the run on w, now compute the final output
@@ -145,9 +144,7 @@ abstract public class CRA<T> extends DFA{
 
         //branching: if finished in an acc. state or not and follow accordingly
         if(isAcceptingState(finalState)){
-
             Rule<T> outputRule = this.v.getRule(finalState);
-
             T finalChange = outputRule.getChange();
             Integer[] finalRegsOrder = outputRule.getRegisters();
             int regDest = outputRule.getRegDest();
@@ -186,8 +183,6 @@ abstract public class CRA<T> extends DFA{
             int regDest = currRule.getRegDest();
             Integer[] rhsRegsOrder = currRule.getRegisters();
 
-            //dilemma: where to calculate the current reg state, in core.CRA or in apply func?
-            //dilemma 2: where to consider the commutativity?
             T newVal = superApply(rhsRegsOrder,regsStateOriginal,change);
             copyOfRegsState.set(regDest, newVal);
         }
@@ -226,9 +221,10 @@ abstract public class CRA<T> extends DFA{
 
     private void printRegs(){
         String ans = "";
-        for(int i=0; i<this.Registers.size(); i++){
+        for(int i=0; i<this.Registers.size()-1; i++){
             ans = ans +" reg["+i+"] value is: " + this.Registers.get(i) + ", ";
         }
+        ans = ans + " reg["+(this.Registers.size()-1)+"] value is: " + this.Registers.get(this.Registers.size()-1) + ", ";
         System.out.println(ans);
     }
 

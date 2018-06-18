@@ -52,7 +52,6 @@ public class NFA extends Automaton{
         return ans;
     }
 
-    @Override
     public Boolean evaluate(String w){ return belongs(w); }
 
     //helper function for evaluate

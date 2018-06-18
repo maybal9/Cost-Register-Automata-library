@@ -1,4 +1,5 @@
 import AutomataBuilders.AdditiveParser;
+import AutomataBuilders.ConcatParser;
 import AutomataBuilders.SCRABuilder;
 import core.ACRA;
 import core.CRA;
@@ -9,6 +10,8 @@ import helpers.Rule;
 import helpers.UpdateRuleList;
 import tests.Tests;
 
+import java.util.ArrayList;
+
 public class Main {
 
     public static void main(String[] args) {
@@ -17,13 +20,26 @@ public class Main {
 //        System.out.println("");
 //        testA1();
 //        System.out.println("");
-//        testS0();
+        testS0();
 
     }
 
+    private static void printRegsValue(ArrayList arr){
+        String ans = "";
+        for(int i=0; i<arr.size()-1; i++){
+            ans = ans +" reg["+i+"] value is: " + arr.get(i) + ", ";
+        }
+        ans = ans + " reg["+(arr.size()-1)+"] value is: " + arr.get(arr.size()-1);
+        System.out.println(ans);
+    }
+
     public static void testWord(CRA M, String w){
-        Object ans = M.evaluate(w);
-        if(ans!=null) System.out.println("the word "+ w +" is accepted by M and it's value is: "+ ans);
+        ArrayList ans = M.evaluate(w);
+        if(ans!=null) {
+            System.out.println("the word "+ w +" is accepted by M and it's value " +
+                    "produces the registers values: ");
+            printRegsValue(ans);
+        }
     }
 
     public static void testA0(){
@@ -49,13 +65,20 @@ public class Main {
 
     public static void testS0(){
         SCRA m2 = buildSCRA0();
-        System.out.println("NAME");
+        System.out.println("Correcting transmissions SCRA");
+        System.out.println("after 'ab' there should not come an 'a'");
+        System.out.println("after 'ac' there should not come an 'b'");
         System.out.println("**********************");
-        testWord(m2,"bba");
-        testWord(m2,"ba");
-        testWord(m2,"a");
-        testWord(m2,"babababa");
-        testWord(m2,"bbb");
+        String s = "aaaaabacc";
+        System.out.println("the original transmission: " + s);
+        testWord(m2,s);
+        String s1 = "abbbacbb";
+        System.out.println("the original transmission: " + s1);
+        testWord(m2,s1);
+        String s2 = "abacba";
+        System.out.println("the original transmission: " + s2);
+        testWord(m2,s2);
+
     }
 
 
@@ -87,8 +110,8 @@ public class Main {
         //**
         String rule1 = "r0=r0+3";
         String rule2 = "r1=r1+5";
-        String out1 = "r0";
-        String out2 = "r1";
+        String out1 = "r0=r0";
+        String out2 = "r1=r1";
 
         //**
         Rule<Integer> r1 = p.parseRule(rule1);
@@ -131,6 +154,83 @@ public class Main {
         } catch (BadArgumentException e) {
             e.printStackTrace();
         }
+        return ans;
+    }
+
+    public static SCRA buildSCRA0(){
+        int numofregs = 2;
+        ConcatParser p = new ConcatParser(numofregs);
+        //**
+        //ok updates
+        Rule<String> okaRule = p.parseRule("r0=r0*a");
+        Rule<String> okbRule = p.parseRule("r0=r0*b");
+        Rule<String> okcRule = p.parseRule("r0=r0*c");
+        Rule<String> okNotChanged = p.parseRule("r0=r0");
+        //error updates
+        Rule<String> errora = p.parseRule("r1=r1*a");
+        Rule<String> errorb = p.parseRule("r1=r1*b");
+        Rule<String> errorNotChanged = p.parseRule("r1=r1");
+
+        //create output function
+        UpdateRuleList<String> neu = new UpdateRuleList<>(2);
+        neu.add(okNotChanged);
+        neu.add(errorNotChanged);
+
+        //create accepting states
+        int[] F = {0,1,2,3};
+
+        //create the delta
+        DeltaImage<String>[][] delta = new DeltaImage[4][3];
+
+        //**
+        Rule<String>[] aba = new Rule[2];
+        aba[0] = okNotChanged;
+        aba[1] = errora;
+        UpdateRuleList<String> illegalAafterAB = new UpdateRuleList<>(aba);
+
+        Rule<String>[] acb = new Rule[2];
+        acb[0] = okNotChanged;
+        acb[1] = errorb;
+        UpdateRuleList<String> illegalBafterAC = new UpdateRuleList<>(acb);
+
+        //**
+        Rule<String>[] oka = new Rule[2];
+        oka[0] = okaRule;
+        oka[1] = errorNotChanged;
+        UpdateRuleList<String> legalA = new UpdateRuleList<>(oka);
+
+        Rule<String>[] okb = new Rule[2];
+        okb[0] = okbRule;
+        okb[1] = errorNotChanged;
+        UpdateRuleList<String> legalB = new UpdateRuleList<>(okb);
+
+        Rule<String>[] okc = new Rule[2];
+        okc[0] = okcRule;
+        okc[1] = errorNotChanged;
+        UpdateRuleList<String> legalC = new UpdateRuleList<>(okc);
+
+        //**
+        delta[0][0] = new DeltaImage<>(1,legalA);
+        delta[0][1] = new DeltaImage<>(0,legalB);
+        delta[0][2] = new DeltaImage<>(0,legalC);
+        delta[1][0] = new DeltaImage<>(1,legalA);
+        delta[1][1] = new DeltaImage<>(2,legalB);
+        delta[1][2] = new DeltaImage<>(3,legalC);
+        delta[2][0] = new DeltaImage<>(1,illegalAafterAB);
+        delta[2][1] = new DeltaImage<>(0,legalB);
+        delta[2][2] = new DeltaImage<>(0,legalC);
+        delta[3][0] = new DeltaImage<>(0,legalA);
+        delta[3][1] = new DeltaImage<>(0,illegalBafterAC);
+        delta[3][2] = new DeltaImage<>(0,legalC);
+
+        //**
+        SCRA ans = new SCRA("abc",4,F,numofregs,neu,delta);
+//        Tests<Integer> t = new Tests<>();
+//        try {
+//            t.testACRA(ans);
+//        } catch (BadArgumentException e) {
+//            e.printStackTrace();
+//        }
         return ans;
     }
 
