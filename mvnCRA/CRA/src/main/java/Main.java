@@ -11,6 +11,8 @@ import helpers.UpdateRuleList;
 import tests.Tests;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Main {
 
@@ -24,12 +26,23 @@ public class Main {
 
     }
 
-    private static void printRegsValue(ArrayList arr){
+    private static void printRegsValue(ArrayList<String> arr){
         String ans = "";
         for(int i=0; i<arr.size()-1; i++){
-            ans = ans +" reg["+i+"] value is: " + arr.get(i) + ", ";
+            ans = ans +"r"+i+"=" + arr.get(i) + ", ";
         }
-        ans = ans + " reg["+(arr.size()-1)+"] value is: " + arr.get(arr.size()-1);
+        ans = ans + "r"+(arr.size()-1)+"=" + arr.get(arr.size()-1);
+        System.out.println(ans);
+    }
+
+    private static void printRegsValueWithRegsNames(ArrayList<String> arr, Map<Integer,String> regsNames){
+        String ans = "";
+        String name = "";
+        for(int i=0; i<arr.size()-1; i++){
+            name = regsNames.get(i);
+            ans = ans + name + "=" + arr.get(i) + ", ";
+        }
+        ans = ans + regsNames.get(arr.size()-1)+"=" + arr.get(arr.size()-1);
         System.out.println(ans);
     }
 
@@ -39,6 +52,15 @@ public class Main {
             System.out.println("the word "+ w +" is accepted by M and it's value " +
                     "produces the registers values: ");
             printRegsValue(ans);
+        }
+    }
+
+    public static void testWordWithRegsName(CRA M, String w, Map<Integer,String> regsNames){
+        ArrayList ans = M.evaluate(w);
+        if(ans!=null) {
+            System.out.println("the word "+ w +" is accepted by M and it's value " +
+                    "produces the registers values: ");
+            printRegsValueWithRegsNames(ans,regsNames);
         }
     }
 
@@ -69,27 +91,41 @@ public class Main {
         System.out.println("after 'ab' there should not come an 'a'");
         System.out.println("after 'ac' there should not come an 'b'");
         System.out.println("**********************");
+        Map<Integer, String> regsNames = new HashMap<>(2);
+        regsNames.put(0,"OK");
+        regsNames.put(1,"ERROR");
         String s = "aaaaabacc";
         System.out.println("the original transmission: " + s);
-        testWord(m2,s);
+        testWordWithRegsName(m2,s,regsNames);
+        System.out.println("");
         String s1 = "abbbacbb";
         System.out.println("the original transmission: " + s1);
-        testWord(m2,s1);
+        testWordWithRegsName(m2,s1,regsNames);
+        System.out.println("");
         String s2 = "abacba";
         System.out.println("the original transmission: " + s2);
-        testWord(m2,s2);
+        testWordWithRegsName(m2,s2,regsNames);
 
     }
 
 
     public static ACRA buildACRA0(){
-        Rule<Integer>[] neuArr = new Rule[2];
         Integer[] regsPart = {1};
+
+        Rule<Integer>[] neuArr0 = new Rule[1];
         Rule r1 = new Rule(0,regsPart,0,true);
+        neuArr0[0] = r1;
+        UpdateRuleList<Integer> neu0 = new UpdateRuleList(neuArr0);
+
+        Rule<Integer>[] neuArr1 = new Rule[1];
         Rule r2= new Rule(0,regsPart,1,true);
-        neuArr[0] = r1;
-        neuArr[1] = r2;
-        UpdateRuleList<Integer> neu = new UpdateRuleList<>(neuArr);
+        neuArr1[0] = r2;
+        UpdateRuleList<Integer> neu1 = new UpdateRuleList(neuArr1);
+
+        UpdateRuleList<Integer>[] neu = new UpdateRuleList[2];
+        neu[0] = neu0;
+        neu[1] = neu1;
+
         int[] F = {0,1};
         DeltaImage<Integer>[][] delta = new DeltaImage[2][2];
         Rule<Integer> r = new Rule(0,regsPart,1,true);
@@ -120,9 +156,14 @@ public class Main {
         Rule<Integer> o2 = p.parseRule(out2);
 
         //create output function
-        UpdateRuleList<Integer> neu = new UpdateRuleList<>(2);
-        neu.add(o1);
-        neu.add(o2);
+        UpdateRuleList<Integer> neu0 = new UpdateRuleList<>(1);
+        neu0.add(o1);
+        UpdateRuleList<Integer> neu1 = new UpdateRuleList<>(1);
+        neu1.add(o2);
+
+        UpdateRuleList<Integer>[] neu = new UpdateRuleList[2];
+        neu[0] = neu0;
+        neu[1] = neu1;
 
         //create accepting states
         int[] F = {0,1};
@@ -172,15 +213,18 @@ public class Main {
         Rule<String> errorNotChanged = p.parseRule("r1=r1");
 
         //create output function
-        UpdateRuleList<String> neu = new UpdateRuleList<>(2);
-        neu.add(okNotChanged);
-        neu.add(errorNotChanged);
+        UpdateRuleList<String>[] neu = new UpdateRuleList[6];
+        for(int i=0; i<6; i++){
+            neu[i] = new UpdateRuleList<>(2);
+            neu[i].add(okNotChanged);
+            neu[i].add(errorNotChanged);
+        }
 
         //create accepting states
-        int[] F = {0,1,2,3};
+        int[] F = {0,1,2,3,4,5};
 
         //create the delta
-        DeltaImage<String>[][] delta = new DeltaImage[4][3];
+        DeltaImage<String>[][] delta = new DeltaImage[6][3];
 
         //**
         Rule<String>[] aba = new Rule[2];
@@ -216,15 +260,22 @@ public class Main {
         delta[1][0] = new DeltaImage<>(1,legalA);
         delta[1][1] = new DeltaImage<>(2,legalB);
         delta[1][2] = new DeltaImage<>(3,legalC);
-        delta[2][0] = new DeltaImage<>(1,illegalAafterAB);
+        delta[2][0] = new DeltaImage<>(4,illegalAafterAB);
         delta[2][1] = new DeltaImage<>(0,legalB);
         delta[2][2] = new DeltaImage<>(0,legalC);
-        delta[3][0] = new DeltaImage<>(0,legalA);
-        delta[3][1] = new DeltaImage<>(0,illegalBafterAC);
+        delta[3][0] = new DeltaImage<>(1,legalA);
+        delta[3][1] = new DeltaImage<>(5,illegalBafterAC);
         delta[3][2] = new DeltaImage<>(0,legalC);
+        delta[4][0] = new DeltaImage<>(4,illegalAafterAB);
+        delta[4][1] = new DeltaImage<>(2,legalB);
+        delta[4][2] = new DeltaImage<>(3,legalC);
+        delta[5][0] = new DeltaImage<>(1,legalA);
+        delta[5][1] = new DeltaImage<>(5,illegalBafterAC);
+        delta[5][2] = new DeltaImage<>(0,legalC);
+
 
         //**
-        SCRA ans = new SCRA("abc",4,F,numofregs,neu,delta);
+        SCRA ans = new SCRA("abc",6,F,numofregs,neu,delta);
 //        Tests<Integer> t = new Tests<>();
 //        try {
 //            t.testACRA(ans);

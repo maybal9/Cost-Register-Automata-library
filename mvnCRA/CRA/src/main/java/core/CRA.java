@@ -25,7 +25,7 @@ abstract public class CRA<T> extends DFA{
     protected T eta;
 
     //neu - the output function: Q-->X*domain
-    protected UpdateRuleList<T> v;
+    protected UpdateRuleList<T>[] v;
 
     //Delta - the extended transition function: (Q*Sigma)-->(Q*(helpers.Rule)^|X|), represented as a 2-dim array of
     //the pairs <Q, <helpers.Rule>Array = <(X,domain)>Array>
@@ -37,7 +37,7 @@ abstract public class CRA<T> extends DFA{
 
     /**constructor*/
     public CRA(String sigma, int numofstates, int[] AcceptingStates , int numofRegisters,
-               UpdateRuleList<T> v, DeltaImage<T>[][] delta, T eta, boolean isCommutative){
+               UpdateRuleList<T>[] v, DeltaImage<T>[][] delta, T eta, boolean isCommutative){
 
         super(sigma,numofstates,AcceptingStates);
 
@@ -144,15 +144,19 @@ abstract public class CRA<T> extends DFA{
 
         //branching: if finished in an acc. state or not and follow accordingly
         if(isAcceptingState(finalState)){
-            Rule<T> outputRule = this.v.getRule(finalState);
-            T finalChange = outputRule.getChange();
-            Integer[] finalRegsOrder = outputRule.getRegisters();
-            int regDest = outputRule.getRegDest();
-
-            T ans = superApply(finalRegsOrder,finalRegsState,finalChange);
-            setRegisters(regDest,ans);
-            ArrayList<T> finalRegsVal = getRegisters();
-            T val = this.Registers.get(regDest);
+            UpdateRuleList<T> outputRuleList = this.v[finalState];
+            Rule<T> outputRule;
+            int regDest;
+            for(int i=0; i< outputRuleList.getSize();i++){
+                outputRule = outputRuleList.getRule(i);
+                T finalChange = outputRule.getChange();
+                Integer[] finalRegsOrder = outputRule.getRegisters();
+                regDest = outputRule.getRegDest();
+                T ans = superApply(finalRegsOrder,finalRegsState,finalChange);
+                setRegisters(regDest,ans);
+            }
+            ArrayList<T> finalRegsVal = new ArrayList<>();
+            finalRegsVal.addAll(getRegisters());
 
            //don't forget to reset the automaton!!!!
             resetRegs();
@@ -193,7 +197,7 @@ abstract public class CRA<T> extends DFA{
     //getters
     public ArrayList<T> getRegisters() { return Registers; }
 
-    public UpdateRuleList<T> getV() {  return v; }
+    public UpdateRuleList<T>[] getV() { return v; }
 
     public DeltaImage<T>[][] getDelta() { return delta; }
 

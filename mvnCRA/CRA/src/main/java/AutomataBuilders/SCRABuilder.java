@@ -10,6 +10,8 @@ import helpers.Rule;
 import helpers.UpdateRuleList;
 import tests.Tests;
 
+import java.util.ArrayList;
+
 public class SCRABuilder {
 
     private String sigma = "";
@@ -20,13 +22,18 @@ public class SCRABuilder {
 
 
     public SCRA buildSCRA(String sigma, int numOfStates, int numOfRegs, int[] acceptingStates,
-                            Pair<Integer, String[]>[][] listOfUpdateRules, String[] listOfOutputRules){
+                          Pair<Integer, String[]>[][] listOfUpdateRules, ArrayList<String[]> listOfOutputRules){
 
         buildStaticVars(sigma, numOfStates, numOfRegs, acceptingStates);
         p = new ConcatParser(this.numOfRegs);
 
         //create output function
-        UpdateRuleList<String> neu = buildUpdateRuleList(listOfOutputRules);
+        UpdateRuleList<String>[] neu = new UpdateRuleList[listOfOutputRules.size()];
+        int i=0;
+        for(String[] l: listOfOutputRules){
+            neu[i] = buildUpdateRuleList(l);
+            i++;
+        }
 
         //create delta
         DeltaImage<String>[][] delta = new DeltaImage[this.numOfStates][this.sigma.length()];

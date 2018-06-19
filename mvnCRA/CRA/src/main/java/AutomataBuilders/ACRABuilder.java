@@ -5,6 +5,8 @@ import core.ACRA;
 import helpers.*;
 import tests.Tests;
 
+import java.util.ArrayList;
+
 
 public class ACRABuilder {
 
@@ -16,13 +18,18 @@ public class ACRABuilder {
 
 
     public ACRA buildACRA(String sigma, int numOfStates, int numOfRegs, int[] acceptingStates,
-                          Pair<Integer, String[]>[][] listOfUpdateRules, String[] listOfOutputRules){
+                          Pair<Integer, String[]>[][] listOfUpdateRules, ArrayList<String[]> listOfOutputRules){
 
         buildStaticVars(sigma, numOfStates, numOfRegs, acceptingStates);
         p = new AdditiveParser(this.numOfRegs);
 
         //create output function
-        UpdateRuleList<Integer> neu = buildUpdateRuleList(listOfOutputRules);
+        UpdateRuleList<Integer>[] neu = new UpdateRuleList[listOfOutputRules.size()];
+        int i=0;
+        for(String[] l: listOfOutputRules){
+            neu[i] = buildUpdateRuleList(l);
+            i++;
+        }
 
         //create delta
         DeltaImage<Integer>[][] delta = new DeltaImage[this.numOfStates][this.sigma.length()];

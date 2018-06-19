@@ -73,25 +73,30 @@ public class Tests<T> {
         }
     }
 
-    private void isOutputValid(UpdateRuleList neu, int numOfStates, int numOfRegs) throws BadArgumentException{
+    private void isOutputValid(UpdateRuleList[] neu, int numOfStates, int numOfRegs) throws BadArgumentException {
         String title = "Accepting States Error: ";
-        String msg = "";
-        if(neu.getSize()<numOfStates){
-            msg = "output function is not full";
-            throw new BadArgumentException(title+msg);
+        for (UpdateRuleList u : neu) {
+            isUpdateRuleListValid(u,numOfStates,numOfRegs);
         }
-        else{
-            if(neu.getSize() > numOfStates) {
+    }
+
+    private void isUpdateRuleListValid(UpdateRuleList u, int numOfStates, int numOfRegs) throws BadArgumentException{
+        String title = "UpdateRuleList Error: ";
+        String msg = "";
+        if (u.getSize() < numOfStates) {
+            msg = "output function is not full";
+            throw new BadArgumentException(title + msg);
+        } else {
+            if (u.getSize() > numOfStates) {
                 msg = "output function is larger than number of states";
-                throw new BadArgumentException(title+msg);
-            }
-            else{
-                for(int i=0; i<neu.getSize(); i++){
-                    try{
-                        isRuleValid(neu.getRule(i), numOfRegs, numOfStates);
-                    } catch (BadArgumentException e){
-                        msg = "rule number: "+ i + "is bad: ";
-                        throw new BadArgumentException(title+msg+e.getMessage());
+                throw new BadArgumentException(title + msg);
+            } else {
+                for (int i = 0; i < u.getSize(); i++) {
+                    try {
+                        isRuleValid(u.getRule(i), numOfRegs, numOfStates);
+                    } catch (BadArgumentException e) {
+                        msg = "rule number: " + i + "is bad: ";
+                        throw new BadArgumentException(title + msg + e.getMessage());
                     }
                 }
             }
@@ -115,7 +120,7 @@ public class Tests<T> {
                         throw new BadArgumentException(title+msg);
                     }
                     try{
-                        isOutputValid(delta[i][j].getUpdateRegsRules(), numOfStates, numOfRegs);
+                        isUpdateRuleListValid(delta[i][j].getUpdateRegsRules(), numOfStates, numOfRegs);
                     } catch(BadArgumentException e){
                         msg = "delta["+i+"]["+j+"] helpers.UpdateRuleList is not valid: ";
                         throw new BadArgumentException(title+msg+e.getMessage());
