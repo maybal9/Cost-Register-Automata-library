@@ -1,5 +1,5 @@
-# ACRA-Library
-a java library for Additive Cost Register Automata
+# Cost-Register-Automata-library
+a java library for Cost Register Automata
 
 program structure: 
 
