@@ -8,6 +8,7 @@ import helpers.Rule;
 public class AdditiveParser implements Parser {
 
     private int numOfRegs;
+    private String delimiter = "+";
 
     public AdditiveParser(int n){
         this.numOfRegs = n;
@@ -51,7 +52,6 @@ public class AdditiveParser implements Parser {
 
     //expecting a string in the form: "rj+rk+..+d", no dups
     private Pair<Integer[],Integer> parseRightHandSideInRule(String s){
-        String delimiter = "+";
 
         //extract change as last argument of rule
         int lastIdxOfDel = s.lastIndexOf(delimiter);
@@ -78,9 +78,10 @@ public class AdditiveParser implements Parser {
         String del = "=";
         int equalSignIndex = s.indexOf(del);
 
-        //got: "ri"
-        if(equalSignIndex<0){
-            String trim = trimSpacesInEdges(s);
+        //got: "ri=ri"
+        if(s.lastIndexOf(delimiter)<0){
+            String cutRule = s.substring(0,equalSignIndex);
+            String trim = trimSpacesInEdges(cutRule);
             int regDest = parseRegister(trim);
             Integer[] self = new Integer[1];
             self[0] = regDest;

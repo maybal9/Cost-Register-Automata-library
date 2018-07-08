@@ -10,6 +10,12 @@ import java.util.Arrays;
 
 public class Tests<T> {
 
+    boolean debugMode;
+
+    public Tests(boolean d){
+        this.debugMode = d;
+    }
+
     public void testACRA(ACRA m) throws BadArgumentException{
         isSigmaValid(m.getSigma());
         isQValid(m.getStates().length);
@@ -75,6 +81,11 @@ public class Tests<T> {
 
     private void isOutputValid(UpdateRuleList[] neu, int numOfStates, int numOfRegs) throws BadArgumentException {
         String title = "Accepting States Error: ";
+        String msg = "";
+        if(neu.length != numOfStates){
+            msg = "output function is not full";
+            throw new BadArgumentException(title+msg);
+        }
         for (UpdateRuleList u : neu) {
             isUpdateRuleListValid(u,numOfStates,numOfRegs);
         }
@@ -83,21 +94,16 @@ public class Tests<T> {
     private void isUpdateRuleListValid(UpdateRuleList u, int numOfStates, int numOfRegs) throws BadArgumentException{
         String title = "UpdateRuleList Error: ";
         String msg = "";
-        if (u.getSize() < numOfStates) {
-            msg = "output function is not full";
-            throw new BadArgumentException(title + msg);
+        if (u.getSize() != numOfRegs) {
+            msg = "Warning: updateRuleList is not full";
+            if(debugMode) {System.out.println(msg);}
         } else {
-            if (u.getSize() > numOfStates) {
-                msg = "output function is larger than number of states";
-                throw new BadArgumentException(title + msg);
-            } else {
-                for (int i = 0; i < u.getSize(); i++) {
-                    try {
-                        isRuleValid(u.getRule(i), numOfRegs, numOfStates);
-                    } catch (BadArgumentException e) {
-                        msg = "rule number: " + i + "is bad: ";
-                        throw new BadArgumentException(title + msg + e.getMessage());
-                    }
+            for (int i = 0; i < u.getSize(); i++) {
+                try {
+                    isRuleValid(u.getRule(i), numOfRegs, numOfStates);
+                } catch (BadArgumentException e) {
+                    msg = "rule number: " + i + "is bad: ";
+                    throw new BadArgumentException(title + msg + e.getMessage());
                 }
             }
         }
@@ -167,12 +173,14 @@ public class Tests<T> {
                         copyCheck[reg]++;
                     }
                     copyFlag = checkCopy(copyCheck);
+                    if(copyFlag){
+                        Arrays.fill(copyCheck,0);
+                    }
+                    else{
+                        throw new BadArgumentException("Not Copyless");
+                    }
                 }
-                copyFlag = checkCopy(copyCheck);
             }
-        }
-        if(!copyFlag){
-            throw new BadArgumentException("Not Copyless");
         }
     }
 

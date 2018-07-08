@@ -17,16 +17,27 @@ import java.util.Map;
 public class Main {
 
     public static void main(String[] args) {
-//        System.out.println("");
-//        testA0();
-//        System.out.println("");
-//        testA1();
-//        System.out.println("");
+        System.out.println("");
+        testA0();
+        System.out.println("");
+        testA1();
+        System.out.println("");
         testS0();
+
+
 
     }
 
-    private static void printRegsValue(ArrayList<String> arr){
+    private static void printRegsValuestr(ArrayList<String> arr){
+        String ans = "";
+        for(int i=0; i<arr.size()-1; i++){
+            ans = ans +"r"+i+"=" + arr.get(i) + ", ";
+        }
+        ans = ans + "r"+(arr.size()-1)+"=" + arr.get(arr.size()-1);
+        System.out.println(ans);
+    }
+
+    private static void printRegsValueint(ArrayList<Integer> arr){
         String ans = "";
         for(int i=0; i<arr.size()-1; i++){
             ans = ans +"r"+i+"=" + arr.get(i) + ", ";
@@ -46,16 +57,25 @@ public class Main {
         System.out.println(ans);
     }
 
-    public static void testWord(CRA M, String w){
+    public static void testWord(ACRA M, String w){
         ArrayList ans = M.evaluate(w);
         if(ans!=null) {
             System.out.println("the word "+ w +" is accepted by M and it's value " +
-                    "produces the registers values: ");
-            printRegsValue(ans);
+                    "induces the registers values: ");
+            printRegsValueint(ans);
         }
     }
 
-    public static void testWordWithRegsName(CRA M, String w, Map<Integer,String> regsNames){
+    public static void testWord(SCRA M, String w){
+        ArrayList ans = M.evaluate(w);
+        if(ans!=null) {
+            System.out.println("the word "+ w +" is accepted by M and it's value " +
+                    "induces the registers values: ");
+            printRegsValuestr(ans);
+        }
+    }
+
+    public static void testWordWithRegsName(SCRA M, String w, Map<Integer,String> regsNames){
         ArrayList ans = M.evaluate(w);
         if(ans!=null) {
             System.out.println("the word "+ w +" is accepted by M and it's value " +
@@ -189,7 +209,7 @@ public class Main {
 
         //**
         ACRA ans = new ACRA("ab",2,F,numofregs,neu,delta);
-        Tests<Integer> t = new Tests<>();
+        Tests<Integer> t = new Tests<>(false);
         try {
             t.testACRA(ans);
         } catch (BadArgumentException e) {

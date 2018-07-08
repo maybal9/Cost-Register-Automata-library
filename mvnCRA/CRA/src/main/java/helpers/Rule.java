@@ -20,6 +20,10 @@ public class Rule<T>{
         }
     }
 
+    public Rule(){
+
+    }
+
     public Integer[] getRegisters(){ return this.regsList;   }
 
     public Integer getRegDest(){ return this.regDest;  }

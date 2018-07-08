@@ -129,5 +129,4 @@ public class ConcatParser implements Parser {
         System.out.println(ans);
     }
 
-
 }

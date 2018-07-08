@@ -46,7 +46,7 @@ public class ACRABuilder {
 
         //**
         ACRA ans = new ACRA(this.sigma,this.numOfStates,this.acceptingStates,this.numOfRegs,neu,delta);
-        Tests<Integer> t = new Tests<>();
+        Tests<Integer> t = new Tests<>(false);
 
         try {
             t.testACRA(ans);
