@@ -3,6 +3,7 @@ import AutomataBuilders.ConcatParser;
 import AutomataBuilders.SCRABuilder;
 import core.ACRA;
 import core.CRA;
+import core.Operators;
 import core.SCRA;
 import helpers.BadArgumentException;
 import helpers.DeltaImage;
@@ -18,14 +19,27 @@ public class Main {
 
     public static void main(String[] args) {
         System.out.println("");
-        testA0();
+        ACRA a0 = testA0();
         System.out.println("");
-        testA1();
+        ACRA a1 = testA1();
         System.out.println("");
-        testS0();
+        SCRA s0 = testS0();
+        System.out.println("******operators********");
+        Operators o = new Operators();
+        String w1 = "bba";
+        String w2 = "abb";
+        printOutput(o.choose(a0,a1,w1),w1);
+        printOutput(o.choose(a0,a1,w2),w2);
 
 
+    }
 
+    public static void printOutput(ArrayList<Integer> ans, String w) {
+        if (ans != null) {
+            System.out.println("the word " + w + " is accepted by M and it's value " +
+                    "induces the registers values: ");
+            printRegsValueint(ans);
+        }
     }
 
     private static void printRegsValuestr(ArrayList<String> arr){
@@ -84,7 +98,7 @@ public class Main {
         }
     }
 
-    public static void testA0(){
+    public static ACRA testA0(){
         ACRA m0 = buildACRA0();
         System.out.println("if (wa) then |w| else |w|+1");
         System.out.println("**********************");
@@ -93,9 +107,10 @@ public class Main {
         testWord(m0,"a");
         testWord(m0,"babababa");
         testWord(m0,"bbb");
+        return m0;
     }
 
-    public static void testA1(){
+    public static ACRA testA1(){
         ACRA m1 = buildACRA1();
         System.out.println("if (wa) then 3#a else 5#b");
         System.out.println("**********************");
@@ -103,9 +118,11 @@ public class Main {
         testWord(m1,"ab");
         testWord(m1,"bbab");
         testWord(m1,"bb");
+        testWord(m1,"abb");
+        return m1;
     }
 
-    public static void testS0(){
+    public static SCRA testS0(){
         SCRA m2 = buildSCRA0();
         System.out.println("Correcting transmissions SCRA");
         System.out.println("after 'ab' there should not come an 'a'");
@@ -125,6 +142,7 @@ public class Main {
         String s2 = "abacba";
         System.out.println("the original transmission: " + s2);
         testWordWithRegsName(m2,s2,regsNames);
+        return m2;
 
     }
 

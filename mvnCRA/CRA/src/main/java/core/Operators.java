@@ -22,7 +22,7 @@ public class Operators<T> {
         return null;
     }
 
-    public boolean isUnambigiouslyConcatenable(DFA a, DFA b){
+    public boolean isUnambigiouslyConcatenable(Automaton a, Automaton b){
         NFA noEpsilon = a.concat(b).removeEpsilonTrans();
         NFA TaggedCrossConcat = noEpsilon.crossTaggedProduct(noEpsilon);
         return !TaggedCrossConcat.has1Flag();

@@ -1,73 +1,61 @@
 package core;
 import helpers.Graph;
+import helpers.State;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public abstract class Automaton<T> {
+public class Automaton<K> {
 
     /*members*/
+    protected String Sigma;
+    protected int numOfStates;
+    protected State<K>[] States;
+    protected State<K> q0;
+    protected int initStateIndex;
+    protected boolean[] AcceptingStates;
+    protected int[][] Delta;
     protected Graph G;
 
-    protected String Sigma;
-
-    protected int numOfStates;
-
-    protected Boolean[] States;
-
-    protected int q0;
-
-    protected int[] acceptingStates;
-
     /*constructor*/
-    public Automaton(String Sigma,int numOfStates, int[] acc){
-        this.Sigma = Sigma;
-        this.numOfStates = numOfStates;
-        this.G = new Graph(numOfStates);
-        this.q0=0;
-
-        //init States
-        this.States = new Boolean[numOfStates];
-        for(int i=0; i<numOfStates; i++) this.States[i] = false;
-        for (int AcceptingState : acc) this.States[AcceptingState] = true;
-
-        //init acceptingStates
-        this.acceptingStates = new int[acc.length];
-        for(int i=0;i<acc.length;i++){
-            this.acceptingStates[i] = acc[i];
+    public Automaton(String sigma, State<K>[] states, State<K> q0,
+                     boolean[] acceptingStates, int[][] delta) {
+        this.Sigma = sigma;
+        this.numOfStates = states.length;
+        this.States = new State[this.numOfStates];
+        for(int i=0; i< states.length; i++) {
+            this.States[i] = new State<K>(states[i]);
         }
+        this.q0 = new State<K>(q0);
+        this.initStateIndex = 0;
+        this.AcceptingStates = new boolean[acceptingStates.length];
+        for(int i=0; i<this.AcceptingStates.length; i++) this.AcceptingStates[i] = acceptingStates[i];
+
+        this.Delta = new int[this.States.length][this.Sigma.length()];
+        for(int a=0; a<this.States.length; a++){
+            for(int b=0; b<this.Sigma.length(); b++){
+                this.Delta[a][b] = delta[a][b];
+            }
+        }
+
+        this.G = null;
     }
 
     /*methods*/
-    protected Integer[] toObject(int[] intArray) {
+    public boolean isAcceptingState(int index){
+        return this.AcceptingStates[index];
+    }
 
-        Integer[] result = new Integer[intArray.length];
-        for (int i = 0; i < intArray.length; i++) {
-            result[i] = Integer.valueOf(intArray[i]);
+    public boolean belongs(String w){
+        int currentStateIndex = initStateIndex;
+        int i=0;
+        while(i<w.length()){
+            currentStateIndex = this.Delta[currentStateIndex][this.Sigma.indexOf(w.charAt(i))];
+            ++i;
         }
-        return result;
+        return isAcceptingState(currentStateIndex);
     }
-
-    public boolean Emptiness(){
-        Integer[] ans = toObject(this.acceptingStates);
-        ArrayList<Integer> lst = (ArrayList<Integer>) Arrays.asList(ans);
-        return this.G.BFS(q0,lst);
-    }
-
-    public abstract boolean belongs(String w);
-
-    public String getSigma() { return this.Sigma; }
-
-    public Boolean[] getStates() { return this.States;  }
-
-    public int[] getAcceptingStates(){  return this.acceptingStates; }
-
-    public Integer[] GetAcceptingStates(){
-        return Arrays.stream( this.acceptingStates ).boxed().toArray( Integer[]::new );
-    }
-
-    public boolean isAcceptingState(int state){ return this.States[state];}
 
     //checks if the given word is in sigma star, meaning if it is composed of symbols of sigma
     public boolean isValidWord(String w){
@@ -104,4 +92,25 @@ public abstract class Automaton<T> {
         List<Integer> l = Arrays.asList(bAcc);
         return l.stream().mapToInt(i->i+promote).toArray() ;
     }
+
+    //unused
+    protected Integer[] toObject(int[] intArray) {
+
+        Integer[] result = new Integer[intArray.length];
+        for (int i = 0; i < intArray.length; i++) {
+            result[i] = Integer.valueOf(intArray[i]);
+        }
+        return result;
+    }
+
+    public boolean Emptiness(){
+        ArrayList<Integer> list = new ArrayList<>();
+        for(int i=0; i< this.AcceptingStates.length; i++){
+            if(this.AcceptingStates[i]){
+                list.add(i);
+            }
+        }
+        return this.G.BFS(initStateIndex,list);
+    }
+
 }

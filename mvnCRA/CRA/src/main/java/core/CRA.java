@@ -6,14 +6,16 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 
-abstract public class CRA<T> extends DFA{
+abstract public class CRA<T,K> extends Automaton<K>{
 
-    /** members
-    inherited from Automaton:
+    /** members inherited from Automaton:
      protected String Sigma;
      protected int numOfStates;
-     protected int q0;
-     protected Integer[] acceptingStates; */
+     protected State<K>[] States;
+     protected State<K> q0;
+     protected int initStateIndex;
+     protected boolean[] AcceptingStates;
+     protected int[][] Delta; */
 
     //States - the accepting and non-accepting states of M represented as a boolean array;
     protected Boolean[] States;
@@ -29,7 +31,7 @@ abstract public class CRA<T> extends DFA{
 
     //Delta - the extended transition function: (Q*Sigma)-->(Q*(helpers.Rule)^|X|), represented as a 2-dim array of
     //the pairs <Q, <helpers.Rule>Array = <(X,domain)>Array>
-    protected DeltaImage<T>[][] delta;
+    protected DeltaImage<T,K>[][] delta;
 
     //commutativity flag
     protected boolean isCommutative;
@@ -57,6 +59,7 @@ abstract public class CRA<T> extends DFA{
 
         //init delta
         this.delta = delta;
+        setUnderlayingDFADelta(this.delta);
 
         //init eta
         this.eta = eta;
@@ -64,6 +67,17 @@ abstract public class CRA<T> extends DFA{
     } // end of constructor
 
     /**methods*/
+    //sets underlying delta according to CRA delta, only reduced
+    private void setUnderlayingDFADelta(DeltaImage<T,K>[][] delta){
+        for(int i=0; i< delta.length; i++){
+            for(int j=0; j< delta[0].length; j++){
+                K val = delta[i][j].getToState();
+                super.setDeltaEntry(i,j,val);
+            }
+        }
+    }
+
+
     /**essential functions*/
 
     //superApply. meant to encapsulate commutative apply and non-commutative apply
@@ -126,7 +140,7 @@ abstract public class CRA<T> extends DFA{
 
         //creates initial configuration with qo and regsState
         //Q: why send the copy of regState instead the original?
-        Configuration<T> currentConfig = new Configuration<>(0,copyOfRegsState);
+        Configuration<T,K> currentConfig = new Configuration<>(0,copyOfRegsState);
 
         //loop: compute the next configuration with eval(sigma, currConfig)
         for(int indexOfSigma = 0; indexOfSigma<w.length(); indexOfSigma++){
@@ -170,8 +184,8 @@ abstract public class CRA<T> extends DFA{
 
         // extracting delta(qi, regsState) = (qj, {<xi,n> | xi is the referenced reg, n is the addition})
         // gets the information for the next step from delta table
-        DeltaImage<T> image = this.delta[currConfig.getState()][calc(sigma)];
-        Integer nextState = image.getToState();
+        DeltaImage<T,K> image = this.delta[currConfig.getState()][calc(sigma)];
+        K nextState = image.getToState();
         UpdateRuleList<T> rules = image.getUpdateRegsRules();
 
         //get the current regsState
@@ -199,7 +213,7 @@ abstract public class CRA<T> extends DFA{
 
     public UpdateRuleList<T>[] getV() { return v; }
 
-    public DeltaImage<T>[][] getDelta() { return delta; }
+    public DeltaImage<T>[][] getdelta() { return this.delta; }
 
     /**miscellaneous*/
     private void printNumOfRegisters(){System.out.println("num of regs is: "+ this.Registers.size());}

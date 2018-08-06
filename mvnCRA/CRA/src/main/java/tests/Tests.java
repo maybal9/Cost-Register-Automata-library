@@ -22,7 +22,7 @@ public class Tests<T> {
         isAcceptingStatesValid(m.getAcceptingStates(), m.getStates().length);
         isRegistersValid(m.getRegisters().size());
         isOutputValid(m.getV(),m.getStates().length ,m.getRegisters().size());
-        isDeltaValid(m.getDelta(), m.getStates().length, m.getSigma(), m.getRegisters().size());
+        isDeltaValid(m.getdelta(), m.getStates().length, m.getSigma(), m.getRegisters().size());
         isCopyless(m);
     }
 
@@ -51,7 +51,7 @@ public class Tests<T> {
             msg = "number of registers should be greater than 0";
             throw new BadArgumentException(title+msg);
         } if(numOfRegs==0){
-            msg = "we don't support DFA's here";
+            msg = "we don't support DF's here";
         }
     }
 
@@ -166,9 +166,9 @@ public class Tests<T> {
         for(int a=0; a<copyCheck.length; a++){
             copyCheck[a]=0;
         }
-        for(int i=0; i<m.getDelta().length;i++){
-            for(int j=0; j<m.getDelta()[0].length;j++){
-                for(Rule r: m.getDelta()[i][j].getUpdateRegsRules().getUpdateRegsRules()){
+        for(int i = 0; i<m.getdelta().length; i++){
+            for(int j = 0; j<m.getdelta()[0].length; j++){
+                for(Rule r: m.getdelta()[i][j].getUpdateRegsRules().getUpdateRegsRules()){
                     for(int reg: r.getRegisters()){
                         copyCheck[reg]++;
                     }
