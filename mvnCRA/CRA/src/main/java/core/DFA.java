@@ -1,12 +1,13 @@
 package core;
 import helpers.Graph;
+import helpers.Pair;
 import helpers.State;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class Automaton<K> {
+public class DFA<K> {
 
     /*members*/
     protected String Sigma;
@@ -19,8 +20,8 @@ public class Automaton<K> {
     protected Graph G;
 
     /*constructor*/
-    public Automaton(String sigma, State<K>[] states, State<K> q0,
-                     boolean[] acceptingStates, int[][] delta) {
+    public DFA(String sigma, State<K>[] states, State<K> q0,
+               boolean[] acceptingStates, int[][] delta) {
         this.Sigma = sigma;
         this.numOfStates = states.length;
         this.States = new State[this.numOfStates];
@@ -40,6 +41,35 @@ public class Automaton<K> {
         }
 
         this.G = null;
+    }
+
+    //getters
+    public String getSigma() {
+        return Sigma;
+    }
+
+    public int getNumOfStates() {
+        return numOfStates;
+    }
+
+    public State<K>[] getStates() {
+        return States;
+    }
+
+    public State<K> getQ0() {
+        return q0;
+    }
+
+    public int getInitStateIndex() {
+        return initStateIndex;
+    }
+
+    public boolean[] getAcceptingStates() {
+        return AcceptingStates;
+    }
+
+    public int[][] getDelta() {
+        return Delta;
     }
 
     /*methods*/
@@ -62,6 +92,71 @@ public class Automaton<K> {
         boolean ans = true;
         for(int i=0; i<w.length() && ans; i++){
             ans = ans & (this.Sigma.indexOf(w.charAt(i)) >= 0);
+        }
+        return ans;
+    }
+
+    public DFA<Pair> createCrossAutomaton(DFA<K> other){
+        State<Pair>[] newStates = createCrossStates(other);
+        State<Pair> newq0 = createCrossInitState(other);
+        boolean[] newAcceptingStates = createCrossAcceptingState(other);
+        int[][] newDelta = createCrossDelta(other);
+        return new DFA<Pair>(this.Sigma,newStates,newq0,newAcceptingStates,newDelta);
+    }
+
+    public DFA<Pair> createAllAcceptingCrossAutomaton(DFA<K> other){
+        State<Pair>[] newStates = createCrossStates(other);
+        State<Pair> newq0 = createCrossInitState(other);
+        boolean[] newAcceptingStates = createAllAcceptingCrossAcceptingState(other);
+        int[][] newDelta = createCrossDelta(other);
+        return new DFA<Pair>(this.Sigma,newStates,newq0,newAcceptingStates,newDelta);
+    }
+
+    private State<Pair>[] createCrossStates(DFA<K> other){
+        State<Pair>[] ans = new State[this.States.length*other.States.length];
+        for(int i=0; i<this.States.length; i++){
+            for(int j=0; j<other.States.length; j++){
+                Pair p = new Pair(this.States[i].getState(),other.States[j].getState());
+                ans[i*this.States.length + j] = new State(p);
+            }
+        }
+        return ans;
+    }
+
+    private State<Pair> createCrossInitState(DFA<K> other){
+        Pair p = new Pair(this.q0.getState(),other.q0.getState());
+        State<Pair> ans = new State(p);
+        return ans;
+    }
+
+    private boolean[] createCrossAcceptingState(DFA<K> other){
+        boolean[] ans = new boolean[this.States.length*other.States.length];
+        for(int i=0; i<this.AcceptingStates.length; i++){
+            for(int j=0; j<other.AcceptingStates.length; j++){
+                ans[i*this.States.length + j] = this.AcceptingStates[i] && other.AcceptingStates[j];
+            }
+        }
+        return ans;
+    }
+
+    private boolean[] createAllAcceptingCrossAcceptingState(DFA<K> other){
+        boolean[] ans = new boolean[this.States.length*other.States.length];
+        for(int i=0; i<ans.length; i++){
+            ans[i] = true;
+        }
+        return ans;
+    }
+
+    private int[][] createCrossDelta(DFA<K> other){
+        int[][] ans = new int[this.States.length*other.States.length][this.Sigma.length()];
+        for(int sigmaIdx=0; sigmaIdx<this.Sigma.length(); sigmaIdx++) {
+            for (int i = 0; i < this.Delta.length; i++) {
+                for (int j = 0; j < other.Delta.length; j++) {
+                    int delta1 = this.Delta[i][sigmaIdx];
+                    int delta2 = other.Delta[j][sigmaIdx];
+                    ans[i * this.States.length + j][sigmaIdx] = delta1 * this.States.length + delta2;
+                }
+            }
         }
         return ans;
     }

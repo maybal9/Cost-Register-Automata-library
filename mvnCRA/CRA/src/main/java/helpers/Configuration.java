@@ -3,20 +3,23 @@ package helpers;
 import java.util.ArrayList;
 
 //represents the current state we're in and the current regsState
-public class Configuration<T,K> {
+public class Configuration<T> {
 
-    private Pair<K, ArrayList<T>> config;
+    private int currState;
+    private ArrayList<T> currRegsValue;
 
-    public Configuration(K q, ArrayList<T> registersState){
-        this.config = new Pair<>(q, registersState);
+    public Configuration(int q, ArrayList<T> registersState){
+        this.currState = q;
+        this.currRegsValue = new ArrayList<>(registersState.size());
+        this.currRegsValue.addAll(registersState);
     }
 
-    public K getState(){
-        return this.config.getKey();
+    public int getState(){
+        return this.currState;
     }
 
     public ArrayList<T> getRegsState(){
-        return this.config.getValue();
+        return this.currRegsValue;
     }
 
     public String printConfig(){

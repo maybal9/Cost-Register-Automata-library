@@ -6,9 +6,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 
-abstract public class CRA<T,K> extends Automaton<K>{
+abstract public class CRA<T,K> extends DFA<K>{
 
-    /** members inherited from Automaton:
+    /** members inherited from DFA:
      protected String Sigma;
      protected int numOfStates;
      protected State<K>[] States;
@@ -17,8 +17,8 @@ abstract public class CRA<T,K> extends Automaton<K>{
      protected boolean[] AcceptingStates;
      protected int[][] Delta; */
 
-    //States - the accepting and non-accepting states of M represented as a boolean array;
-    protected Boolean[] States;
+//    //States - the accepting and non-accepting states of M represented as a boolean array;
+//    protected Boolean[] States;
 
     //Registers - all registers represented as an Array<T>;
     protected  ArrayList<T> Registers;
@@ -26,59 +26,105 @@ abstract public class CRA<T,K> extends Automaton<K>{
     //eta - the initial value of all registers;
     protected T eta;
 
-    //neu - the output function: Q-->X*domain
-    protected UpdateRuleList<T>[] v;
+    //neu - the output function: Q-->(X*domain)^|X|
+    protected UpdateRuleList<T>[] nu;
 
     //Delta - the extended transition function: (Q*Sigma)-->(Q*(helpers.Rule)^|X|), represented as a 2-dim array of
     //the pairs <Q, <helpers.Rule>Array = <(X,domain)>Array>
-    protected DeltaImage<T,K>[][] delta;
+    protected MuImage<T>[][] mu;
 
     //commutativity flag
     protected boolean isCommutative;
 
 
     /**constructor*/
-    public CRA(String sigma, int numofstates, int[] AcceptingStates , int numofRegisters,
-               UpdateRuleList<T>[] v, DeltaImage<T>[][] delta, T eta, boolean isCommutative){
 
-        super(sigma,numofstates,AcceptingStates);
-
-        //init commutativity flag
+    public CRA(String sigma, State<K>[] states, State<K> q0,
+               boolean[] acceptingStates, int[][] delta,
+               int numofRegisters, UpdateRuleList<T>[] nu,
+               MuImage<T>[][] mu, T eta, boolean isCommutative){
+        super(sigma,states,q0,acceptingStates,delta);
         this.isCommutative = isCommutative;
-
-        //init Registers
         this.Registers = new ArrayList<>(numofRegisters);
         int i=0;
         while(i<numofRegisters){
             this.Registers.add(eta);
             i++;
         }
-
-        //init neu
-        this.v = v;
-
-        //init delta
-        this.delta = delta;
-        setUnderlayingDFADelta(this.delta);
-
-        //init eta
+        this.nu = nu;
+        this.mu = mu;
         this.eta = eta;
-
     } // end of constructor
 
-    /**methods*/
-    //sets underlying delta according to CRA delta, only reduced
-    private void setUnderlayingDFADelta(DeltaImage<T,K>[][] delta){
-        for(int i=0; i< delta.length; i++){
-            for(int j=0; j< delta[0].length; j++){
-                K val = delta[i][j].getToState();
-                super.setDeltaEntry(i,j,val);
-            }
-        }
+    public CRA(String sigma, State<K>[] states, State<K> q0,
+               boolean[] acceptingStates, int[][] delta,
+               ArrayList<T> Regs, UpdateRuleList<T>[] nu,
+               MuImage<T>[][] mu, T eta, boolean isCommutative){
+        super(sigma,states,q0,acceptingStates,delta);
+        this.isCommutative = isCommutative;
+        this.Registers = new ArrayList<>(Regs);
+        this.nu = nu;
+        this.mu = mu;
+        this.eta = eta;
     }
 
+    /**factory create method*/
+    public abstract CRA createCRA(String sigma, State[] states, State q0,
+                                       boolean[] acceptingStates, int[][] delta,
+                                       ArrayList<T> Regs, UpdateRuleList<T>[] nu,
+                                       MuImage<T>[][] mu, T eta, boolean isCommutative);
 
+    /**methods*/
     /**essential functions*/
+
+    public CRA<T,Pair> createChooseCRA(CRA<T,K> other){
+        DFA<Pair> a = super.createAllAcceptingCrossAutomaton(other);
+        String newSigma = a.getSigma();
+        State<Pair>[] newStates = a.getStates();
+        State<Pair> newQ0 = a.getQ0();
+        boolean[] acc = a.getAcceptingStates();
+        int[][] newDelta = a.getDelta();
+        T eta = this.eta;
+
+        ArrayList<T> newRegs = new ArrayList<>(this.getRegisters());
+        newRegs.addAll(other.getRegisters());
+        UpdateRuleList<T>[] newNu =
+                concatNu(newStates.length,this.States.length,eta,other.getRegisters().size(),other.getNu());
+        MuImage<T>[][] newMu = new MuImage[newStates.length][newSigma.length()];
+        for(int p=0; p<newStates.length;p++){
+            for(int b=0; b<newSigma.length(); b++){
+                int qiIdxInA1 = p/this.numOfStates;
+                int qjIdxInA2 = p%this.numOfStates;
+                int toState = newDelta[p][b];
+                UpdateRuleList<T> u1 = this.getMu()[qiIdxInA1][b].getUpdateRegsRules();
+                UpdateRuleList<T> u2 = other.getMu()[qjIdxInA2][b].getUpdateRegsRules();
+                UpdateRuleList u = u1.concatURLs(u2,this.getRegisters().size(),other.getRegisters().size());
+                newMu[p][b] = new MuImage<>(toState,u);
+            }
+        }
+        boolean isComm = this.isCommutative && other.isCommutative;
+        return createCRA(newSigma,newStates,newQ0,acc,newDelta,newRegs,newNu,newMu,eta,isComm);
+    }
+
+    private UpdateRuleList<T>[] concatNu(int numofNewStates, int numOfRows, T eta,
+                                         int numOfOtherRegs ,UpdateRuleList<T>[] otherNu) {
+        UpdateRuleList<T>[] newNu = new UpdateRuleList[numofNewStates];
+        int A1NumOfRegs = this.getRegisters().size();
+        for (int tau = 0; tau < newNu.length; tau++) {
+            int qiIdxInA1 = tau / numOfRows;
+            int qjIdxInA2 = tau % numOfRows;
+            UpdateRuleList<T> currA1Nu = this.getNu()[qiIdxInA1];
+            UpdateRuleList<T> currA2Nu = otherNu[qjIdxInA2];
+            newNu[tau] = currA1Nu.concatURLs(currA2Nu,this.getRegisters().size(),numOfOtherRegs);
+            if (super.isAcceptingState(qiIdxInA1)) {
+                newNu[tau].resetFromTo(A1NumOfRegs,newNu[tau].getSize(),eta);
+            } else {
+                newNu[tau].resetFromTo(0,A1NumOfRegs,eta);
+            }
+        }
+        return newNu;
+    }
+
 
     //superApply. meant to encapsulate commutative apply and non-commutative apply
     private T superApply(Integer[] rhsRegsOrder, ArrayList<T> regsStateOriginal, T change){
@@ -140,7 +186,7 @@ abstract public class CRA<T,K> extends Automaton<K>{
 
         //creates initial configuration with qo and regsState
         //Q: why send the copy of regState instead the original?
-        Configuration<T,K> currentConfig = new Configuration<>(0,copyOfRegsState);
+        Configuration<T> currentConfig = new Configuration<>(0,copyOfRegsState);
 
         //loop: compute the next configuration with eval(sigma, currConfig)
         for(int indexOfSigma = 0; indexOfSigma<w.length(); indexOfSigma++){
@@ -158,16 +204,22 @@ abstract public class CRA<T,K> extends Automaton<K>{
 
         //branching: if finished in an acc. state or not and follow accordingly
         if(isAcceptingState(finalState)){
-            UpdateRuleList<T> outputRuleList = this.v[finalState];
+            UpdateRuleList<T> outputRuleList = this.nu[finalState];
             Rule<T> outputRule;
             int regDest;
             for(int i=0; i< outputRuleList.getSize();i++){
                 outputRule = outputRuleList.getRule(i);
-                T finalChange = outputRule.getChange();
-                Integer[] finalRegsOrder = outputRule.getRegisters();
                 regDest = outputRule.getRegDest();
-                T ans = superApply(finalRegsOrder,finalRegsState,finalChange);
-                setRegisters(regDest,ans);
+                T ans = this.eta;
+                if(!outputRule.isEmptyRule()) {
+                    T finalChange = outputRule.getChange();
+                    Integer[] finalRegsOrder = outputRule.getRegisters();
+                    ans = superApply(finalRegsOrder, finalRegsState, finalChange);
+
+                } else{
+                    ans = ((EmptyRule<T>)outputRule).getEta();
+                }
+                setRegisters(regDest, ans);
             }
             ArrayList<T> finalRegsVal = new ArrayList<>();
             finalRegsVal.addAll(getRegisters());
@@ -182,10 +234,10 @@ abstract public class CRA<T,K> extends Automaton<K>{
     //computes the next configuration according to current configuration and the current letter being read
     protected Configuration<T> evaluate(Configuration<T> currConfig, char sigma){
 
-        // extracting delta(qi, regsState) = (qj, {<xi,n> | xi is the referenced reg, n is the addition})
+        // extracting mu(qi, regsState) = (qj, {<xi,n> | xi is the referenced reg, n is the addition})
         // gets the information for the next step from delta table
-        DeltaImage<T,K> image = this.delta[currConfig.getState()][calc(sigma)];
-        K nextState = image.getToState();
+        MuImage<T> image = this.mu[currConfig.getState()][calc(sigma)];
+        int nextState = image.getToState();
         UpdateRuleList<T> rules = image.getUpdateRegsRules();
 
         //get the current regsState
@@ -197,11 +249,16 @@ abstract public class CRA<T,K> extends Automaton<K>{
         // for each rule, preform it. read from original regsState, write into copy of regsState
         for(int i=0; i<rules.getSize(); i++){
             Rule<T> currRule = rules.getRule(i);
-            T change = currRule.getChange();
             int regDest = currRule.getRegDest();
-            Integer[] rhsRegsOrder = currRule.getRegisters();
-
-            T newVal = superApply(rhsRegsOrder,regsStateOriginal,change);
+            T newVal = this.eta;
+            if(!currRule.isEmptyRule()) {
+                T change = currRule.getChange();
+                Integer[] rhsRegsOrder = currRule.getRegisters();
+                newVal = superApply(rhsRegsOrder, regsStateOriginal, change);
+            }
+            else{
+                newVal = ((EmptyRule<T>)currRule).getEta();
+            }
             copyOfRegsState.set(regDest, newVal);
         }
         return new Configuration<>(nextState,copyOfRegsState);
@@ -211,11 +268,13 @@ abstract public class CRA<T,K> extends Automaton<K>{
     //getters
     public ArrayList<T> getRegisters() { return Registers; }
 
-    public UpdateRuleList<T>[] getV() { return v; }
+    public UpdateRuleList<T>[] getNu() { return nu; }
 
-    public DeltaImage<T>[][] getdelta() { return this.delta; }
+    public MuImage<T>[][] getMu() { return this.mu; }
 
     /**miscellaneous*/
+    private int calc(char c){ return this.Sigma.indexOf(c);}
+
     private void printNumOfRegisters(){System.out.println("num of regs is: "+ this.Registers.size());}
 
     public void setRegisters(int i, T val){this.Registers.set(i,val); }
@@ -226,10 +285,6 @@ abstract public class CRA<T,K> extends Automaton<K>{
             this.Registers.set(i,val);
         }
     }
-
-    private int calc(char c){ return this.Sigma.indexOf(c);}
-
-    public boolean isAcceptingState(int k){return super.isAcceptingState(k); }
 
     protected void resetRegs(){
         for(int i=0; i<this.Registers.size(); i++){
