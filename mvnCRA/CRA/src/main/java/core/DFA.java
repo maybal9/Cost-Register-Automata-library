@@ -117,7 +117,7 @@ public class DFA<K> {
         for(int i=0; i<this.States.length; i++){
             for(int j=0; j<other.States.length; j++){
                 Pair p = new Pair(this.States[i].getState(),other.States[j].getState());
-                ans[i*this.States.length + j] = new State(p);
+                ans[i*other.States.length + j] = new State(p);
             }
         }
         return ans;
@@ -154,7 +154,7 @@ public class DFA<K> {
                 for (int j = 0; j < other.Delta.length; j++) {
                     int delta1 = this.Delta[i][sigmaIdx];
                     int delta2 = other.Delta[j][sigmaIdx];
-                    ans[i * this.States.length + j][sigmaIdx] = delta1 * this.States.length + delta2;
+                    ans[i * other.States.length + j][sigmaIdx] = delta1 * other.States.length + delta2;
                 }
             }
         }

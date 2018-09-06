@@ -2,6 +2,7 @@ import AutomataBuilders.ACRAMaker;
 import AutomataBuilders.AdditiveParser;
 import AutomataBuilders.ConcatParser;
 import core.ACRA;
+import core.DFA;
 import core.SCRA;
 import helpers.*;
 
@@ -12,19 +13,39 @@ import java.util.Map;
 public class Main {
 
     public static void main(String[] args) {
-//        System.out.println("");
-//        ACRA a0 = testA0();
-//        System.out.println("");
-//         ACRA a1 = testA1();
-//        System.out.println("");
-//        SCRA s0 = testS0();
-//        System.out.println("");
-//        ACRA a3 = testA3();
-//        System.out.println("");
-//        ACRA a4 = testA4();
-//        System.out.println("");
+        System.out.println("");
+        ACRA a0 = testA0();
+        System.out.println("");
+        ACRA a1 = testA1();
+        System.out.println("");
+        SCRA s0 = testS0();
+        System.out.println("");
+        ACRA a3 = testA3();
+        System.out.println("");
+        ACRA a4 = testA4();
+        System.out.println("");
+        ACRA a5 = testA5();
+        System.out.println("");
+        ACRA a6 = testA6();
+        System.out.println("");
+        ACRA a7 = testA7();
+        System.out.println("");
+        ACRA a8 = testA8();
+        System.out.println("");
         ACRA c = testChoose();
         System.out.println("");
+        ACRA c1 = testChoose78();
+        System.out.println("");
+        System.out.println("");
+        newTestChoose78("ba#bb#");
+        System.out.println("");
+        newTestChoose78("a#bab#a");
+        System.out.println("");
+        newTestChoose78("baababa#aa");
+        System.out.println("");
+        newTestChoose78("aba#bab#aa#aa");
+        System.out.println("");
+
     }
 
     public static void printOutput(ArrayList<Integer> ans, String w) {
@@ -46,11 +67,16 @@ public class Main {
 
     private static void printRegsValueint(ArrayList<Integer> arr){
         String ans = "";
-        for(int i=0; i<arr.size()-1; i++){
-            ans = ans +"r"+i+"=" + arr.get(i) + ", ";
+        if(arr==null || arr.size()==0){
+            System.out.println("Hi");
         }
-        ans = ans + "r"+(arr.size()-1)+"=" + arr.get(arr.size()-1);
-        System.out.println(ans);
+        else {
+            for (int i = 0; i < arr.size() - 1; i++) {
+                ans = ans + "r" + i + "=" + arr.get(i) + ", ";
+            }
+            ans = ans + "r" + (arr.size() - 1) + "=" + arr.get(arr.size() - 1);
+            System.out.println(ans);
+        }
     }
 
     private static void printRegsValueWithRegsNames(ArrayList<String> arr, Map<Integer,String> regsNames){
@@ -66,11 +92,29 @@ public class Main {
 
     public static void testWord(ACRA M, String w){
         ArrayList ans = M.evaluate(w);
-        if(ans!=null) {
-            System.out.println("the word "+ w +" is accepted by M and it's value " +
+        System.out.println("the word "+ w +" is accepted by M and it's value " +
                     "induces the registers values: ");
-            printRegsValueint(ans);
+        printRegsValueint(ans);
+        M.resetRegs();
+    }
+
+    public static void testWordAgainst(ACRA m1,String name1 ,ACRA m2, String name2 ,ACRA c, String w){
+        ArrayList ans1 = m1.evaluate(w);
+        m1.resetRegs();
+        ArrayList ans2 = m2.evaluate(w);
+        m2.resetRegs();
+        ArrayList ans3 = c.evaluate(w);
+        if(m1.belongs(w)){
+            System.out.println("the word "+ w +" is accepted by "+ name1 +" and it's value " +
+                    "induces the registers values: ");
+            printRegsValueint(ans1);
+        } else{
+            System.out.println("the word "+ w +" is NOT accepted by "+ name1 +" and therefore it's value " +
+                    "is calculated by "+ name2 +" which induces the registers values: ");
+            printRegsValueint(ans2);
         }
+        System.out.println("the choose ACRA on "+w+" induces the registers value: ");
+        printRegsValueint(ans3);
     }
 
     public static void testWord(SCRA M, String w){
@@ -139,6 +183,60 @@ public class Main {
         return m4;
     }
 
+    public static ACRA testA5(){
+        ACRA m5 = buildACRA5();
+        System.out.println("if (wa) then 7#a else undefined");
+        System.out.println("**********************");
+        testWord(m5,"bbaba");
+        testWord(m5,"abbabababababa");
+        testWord(m5,"bbabab");
+        testWord(m5,"bbbbbabaa");
+        testWord(m5,"abbaaaaaababa");
+        return m5;
+    }
+
+    public static ACRA testA6(){
+        ACRA m6 = buildACRA6();
+        System.out.println("if (wa) then 30|w| else 50|w|");
+        System.out.println("**********************");
+        testWord(m6,"bbaba");
+        testWord(m6,"abbabababababa");
+        testWord(m6,"bbabab");
+        testWord(m6,"bbbbbabaa");
+        testWord(m6,"abbaaaaaababa");
+        return m6;
+    }
+
+    public static ACRA testA7(){
+        ACRA m7 = buildACRA7();
+        System.out.println("Pay 10 for the first a in a block" +
+                " and 1 for each consecutive a" +
+                " if the letter ends with # output the number of blocks");
+        System.out.println("**********************");
+        testWord(m7,"b#bab#");
+//        testWord(m7,"##a#a");
+//        testWord(m7,"a##a#a#a#a#a#a");
+//        testWord(m7,"##a#a#");
+//        testWord(m7,"#a#aa");
+//        testWord(m7,"a##aaaaaa#a#a");
+        return m7;
+    }
+
+    public static ACRA testA8(){
+        ACRA m8 = buildACRA8();
+        System.out.println("Pay 10 for the first letter (a or b) in a block " +
+                " and 1 for each consecutive same letter " +
+                "until the first # then pay double");
+        System.out.println("**********************");
+        testWord(m8,"b#bab#");
+//        testWord(m8,"bb#ab#a");
+//        testWord(m8,"abb#aba#babababa");
+//        testWord(m8,"bb#abab#");
+//        testWord(m8,"bbb#bb#aba#a");
+//        testWord(m8,"ab#ba#aa#aaaba#ba");
+        return m8;
+    }
+
     public static ACRA testChoose(){
         ACRA m3 = buildACRA3();
         ACRA m4 = buildACRA4();
@@ -161,6 +259,33 @@ public class Main {
         return c;
 
     }
+
+    public static ACRA testChoose78(){
+        ACRA m7 = buildACRA7();
+        ACRA m8 = buildACRA8();
+        ACRA c = buildChooseACRA(m7,m8);
+        System.out.println("words that do not end with a # and have at least 1 a: m7, else: m8");
+        System.out.println("**********************");
+        testWord(c,"b#bab#");
+//        testWord(c,"aaaa#ab#a");
+//        testWord(c,"aaaa#aaa");
+//        testWord(c,"aa#a#");
+//        testWord(c,"##aaa");
+//        testWord(c,"a#a#a");
+//        testWord(c, "aaaa#bbb");
+//        testWord(c,"a#a#a#");
+//        testWord(c, "aaaa#bbb#");
+        return c;
+
+    }
+
+    public static void newTestChoose78(String w){
+        ACRA m7 = buildACRA7();
+        ACRA m8 = buildACRA8();
+        ACRA c = buildChooseACRA(m7,m8);
+        testWordAgainst(m7,"m7",m8,"m8",c,w);
+    }
+
 
     public static SCRA testS0(){
         SCRA m2 = buildSCRA0();
@@ -482,8 +607,219 @@ public class Main {
         return m.makeACRA();
     }
 
+    public static ACRA buildACRA5() {
+        ACRAMaker m = new ACRAMaker();
+        m.setSigma("ab");
+        m.setNumOfStates(2);
+        ArrayList<Integer> acc = new ArrayList<>(1);
+        acc.add(0);
+        m.setAcceptingStates(acc);
+        m.setRegisters(2);
+        String outRule0 = "r0=r0";
+        String outRule1 = "r1=r1";
+        String[] out0List = {outRule0};
+        String[] out1List = {outRule1};
+        ArrayList<String[]> outputList = new ArrayList<>(2);
+        outputList.add(0, out0List);
+        outputList.add(1, out1List);
+        m.setNu(outputList);
+        String inc0By7Rule = "r0=r0+7";
+        String dontChange0Rule = "r0=r0";
+        String inc1By11Rule = "r1=r1+11";
+        String dontChange1Rule = "r1=r1";
+        String[] inc0By7List = {inc0By7Rule,dontChange1Rule};
+        String[] inc1By11List = {dontChange0Rule,inc1By11Rule};
+        Pair<Integer, String[]>[][] mu = new Pair[2][2];
+        mu[0][0] = new Pair(0, inc0By7List);
+        mu[0][1] = new Pair(1, inc1By11List);
+        mu[1][0] = new Pair(0, inc0By7List);
+        mu[1][1] = new Pair(1, inc1By11List);
+        m.setMuAndDelta(mu);
+        return m.makeACRA();
+    }
+
+    public static ACRA buildACRA6() {
+        ACRAMaker m = new ACRAMaker();
+        m.setSigma("ab");
+        m.setNumOfStates(2);
+        ArrayList<Integer> acc = new ArrayList<>(2);
+        acc.add(0);
+        acc.add(1);
+        m.setAcceptingStates(acc);
+        m.setRegisters(2);
+        String out0Rule = "r0=r0";
+        String out1Rule = "r1=r1";
+        String[] out0List = {out0Rule};
+        String[] out1List = {out1Rule};
+        ArrayList<String[]> outputList = new ArrayList<>(2);
+        outputList.add(0, out0List);
+        outputList.add(1, out1List);
+        m.setNu(outputList);
+        String inc0by30Rule = "r0=r0+30";
+        String inc1by50Rule = "r1=r1+50";
+        String[] incList = {inc0by30Rule,inc1by50Rule};
+        Pair<Integer, String[]>[][] mu = new Pair[2][2];
+        mu[0][0] = new Pair(0, incList);
+        mu[0][1] = new Pair(1, incList);
+        mu[1][0] = new Pair(0, incList);
+        mu[1][1] = new Pair(1, incList);
+        m.setMuAndDelta(mu);
+        return m.makeACRA();
+    }
+
+    public static ACRA buildACRA7() {
+        ACRAMaker m = new ACRAMaker();
+        m.setSigma("ab#");
+        m.setNumOfStates(2);
+        ArrayList<Integer> acc = new ArrayList<>(1);
+        acc.add(1);
+        m.setAcceptingStates(acc);
+        m.setRegisters(2);
+        String out0Rule = "r0=r0";
+        String out1Rule = "r1=r1";
+        String[] out0List = {out0Rule};
+        String[] out1List = {out1Rule};
+        ArrayList<String[]> outputList = new ArrayList<>(2);
+        outputList.add(0, out0List);
+        outputList.add(1, out1List);
+        m.setNu(outputList);
+        String inc1by10Rule = "r1=r1+10";
+        String inc1by1Rule = "r1=r1+1";
+        String inc0by1Rule = "r0=r0+1";
+        String nochange0Rule = "r0=r0";
+        String nochange1Rule = "r1=r1";
+        String[] inc1by10List = {nochange0Rule,inc1by10Rule};
+        String[] inc0by1List = {inc0by1Rule,nochange1Rule};
+        String[] inc1by1List = {nochange0Rule,inc1by1Rule};
+        String[] dontChangeList = {nochange0Rule,nochange1Rule};
+        Pair<Integer, String[]>[][] mu = new Pair[2][3];
+        mu[0][0] = new Pair(1, inc1by10List);
+        mu[0][1] = new Pair(0, dontChangeList);
+        mu[0][2] = new Pair(0, inc0by1List);
+        mu[1][0] = new Pair(1, inc1by1List);
+        mu[1][1] = new Pair(1, dontChangeList);
+        mu[1][2] = new Pair(0, inc0by1List);
+        m.setMuAndDelta(mu);
+        return m.makeACRA();
+    }
+
+    public static ACRA buildACRA8() {
+        ACRAMaker m = new ACRAMaker();
+        m.setSigma("ab#");
+        m.setNumOfStates(4);
+        ArrayList<Integer> acc = new ArrayList<>(4);
+        acc.add(0);
+        acc.add(1);
+        acc.add(2);
+        acc.add(3);
+        m.setAcceptingStates(acc);
+        m.setRegisters(2);
+        String out0Rule = "r0=r0";
+        String out1Rule = "r1=r1";
+        String[] out0List = {out0Rule};
+        String[] out1List = {out1Rule};
+        ArrayList<String[]> outputList = new ArrayList<>(4);
+        outputList.add(0, out0List);
+        outputList.add(1, out0List);
+        outputList.add(2, out1List);
+        outputList.add(3, out1List);
+        m.setNu(outputList);
+
+        String inc0by10Rule = "r0=r0+10";
+        String inc0by1Rule = "r0=r0+1";
+        String inc1by2Rule = "r1=r1+2";
+        String inc1by20Rule = "r1=r1+20";
+        String dontChange0Rule = "r0=r0";
+        String dontChange1Rule = "r1=r1";
+        String[] incfirstList = {inc0by10Rule,inc1by20Rule};
+        String[] incsecondList = {inc0by1Rule,inc1by2Rule};
+        String[] inc1onlyList = {dontChange0Rule,inc1by2Rule};
+        String[] inc1only20List = {dontChange0Rule,inc1by20Rule};
+        String[] dontChangeList = {dontChange0Rule,dontChange1Rule};
+        Pair<Integer, String[]>[][] mu = new Pair[4][3];
+        mu[0][0] = new Pair(1, incfirstList);
+        mu[0][1] = new Pair(0, incsecondList);
+        mu[0][2] = new Pair(2, dontChangeList);
+        mu[1][0] = new Pair(1, incsecondList);
+        mu[1][1] = new Pair(0, incfirstList);
+        mu[1][2] = new Pair(2, dontChangeList);
+        mu[2][0] = new Pair(3, inc1only20List);
+        mu[2][1] = new Pair(2, inc1onlyList);
+        mu[2][2] = new Pair(2, dontChangeList);
+        mu[3][0] = new Pair(3, inc1onlyList);
+        mu[3][1] = new Pair(2, inc1only20List);
+        mu[3][2] = new Pair(3, dontChangeList);
+        m.setMuAndDelta(mu);
+        return m.makeACRA();
+    }
+
     public static ACRA buildChooseACRA(ACRA a1, ACRA a2){
         return (ACRA) a1.createChooseCRA(a2);
+    }
+
+    public static DFA buildDFAEndsWithAnA(){
+        String Sigma = "ab";
+
+        State[] states = new State[2];
+        State<Integer> zero = new State<>(0);
+        State<Integer> one = new State<>(1);
+        states[0] = zero;
+        states[1] = one;
+
+        boolean[] F = {true,false};
+
+        int[][] delta = new int[states.length][Sigma.length()];
+        delta[0][0] = 0;
+        delta[0][1] = 1;
+        delta[1][0] = 0;
+        delta[1][1] = 1;
+        return new DFA<Integer>(Sigma, states, zero, F, delta);
+    }
+
+    public static DFA buildDFAStartsWithAnA(){
+        String Sigma = "ab";
+
+        State[] states = new State[3];
+        State<Integer> zero = new State<>(0);
+        State<Integer> one = new State<>(1);
+        State<Integer> two = new State<>(2);
+        states[0] = zero;
+        states[1] = one;
+        states[2] = two;
+
+        boolean[] F = {false,true,false};
+
+        int[][] delta = new int[states.length][Sigma.length()];
+        delta[0][0] = 1;
+        delta[0][1] = 2;
+        delta[1][0] = 1;
+        delta[1][1] = 1;
+        delta[2][0] = 2;
+        delta[2][1] = 2;
+        return new DFA<Integer>(Sigma, states, zero, F, delta);
+    }
+
+    public static DFA buildDFAContainsAA(){
+        String Sigma = "ab";
+
+        State[] states = new State[3];
+        State<Integer> zero = new State<>(0);
+        State<Integer> one = new State<>(1);
+        State<Integer> two = new State<>(2);
+        states[0] = zero;
+        states[1] = one;
+        states[2] = two;
+
+        boolean[] F = {false,false,true};
+
+        int[][] delta = new int[states.length][Sigma.length()];
+        delta[0][0] = 1;
+        delta[0][1] = 0;
+        delta[1][0] = 2;
+        delta[1][1] = 1;
+        delta[2][0] = 2;
+        delta[2][1] = 2;
+        return new DFA<Integer>(Sigma, states, zero, F, delta);
     }
 
 }

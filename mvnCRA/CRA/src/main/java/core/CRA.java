@@ -88,13 +88,15 @@ abstract public class CRA<T,K> extends DFA<K>{
 
         ArrayList<T> newRegs = new ArrayList<>(this.getRegisters());
         newRegs.addAll(other.getRegisters());
+
         UpdateRuleList<T>[] newNu =
-                concatNu(newStates.length,this.States.length,eta,other.getRegisters().size(),other.getNu());
+                concatNu(newStates.length,other.States.length,eta,other.getRegisters().size(),other.getNu());
+
         MuImage<T>[][] newMu = new MuImage[newStates.length][newSigma.length()];
         for(int p=0; p<newStates.length;p++){
             for(int b=0; b<newSigma.length(); b++){
-                int qiIdxInA1 = p/this.numOfStates;
-                int qjIdxInA2 = p%this.numOfStates;
+                int qiIdxInA1 = p/other.numOfStates;
+                int qjIdxInA2 = p%other.numOfStates;
                 int toState = newDelta[p][b];
                 UpdateRuleList<T> u1 = this.getMu()[qiIdxInA1][b].getUpdateRegsRules();
                 UpdateRuleList<T> u2 = other.getMu()[qjIdxInA2][b].getUpdateRegsRules();
@@ -117,9 +119,10 @@ abstract public class CRA<T,K> extends DFA<K>{
             UpdateRuleList<T> currA2Nu = otherNu[qjIdxInA2];
             newNu[tau] = currA1Nu.concatURLs(currA2Nu,this.getRegisters().size(),numOfOtherRegs);
             if (super.isAcceptingState(qiIdxInA1)) {
-                newNu[tau].resetFromTo(A1NumOfRegs,newNu[tau].getSize(),eta);
+//                System.out.println("qi is an accepting state in A1");
+                newNu[tau] = newNu[tau].trim(0,currA1Nu.getSize());
             } else {
-                newNu[tau].resetFromTo(0,A1NumOfRegs,eta);
+                newNu[tau] = newNu[tau].trim(currA1Nu.getSize(),newNu[tau].getSize());
             }
         }
         return newNu;
@@ -181,6 +184,8 @@ abstract public class CRA<T,K> extends DFA<K>{
 
     //evaluate functions of Automaton!!!
     public ArrayList<T> evaluate(String w){
+        ArrayList<T> finalOutputRegsVal = new ArrayList<>();
+
         //creates a copy of the regsState
         ArrayList<T> copyOfRegsState = new ArrayList<>(this.Registers);
 
@@ -205,30 +210,40 @@ abstract public class CRA<T,K> extends DFA<K>{
         //branching: if finished in an acc. state or not and follow accordingly
         if(isAcceptingState(finalState)){
             UpdateRuleList<T> outputRuleList = this.nu[finalState];
+//            System.out.println("I'm right before output!!!");
+//            System.out.println(outputRuleList.printURL());
             Rule<T> outputRule;
             int regDest;
             for(int i=0; i< outputRuleList.getSize();i++){
                 outputRule = outputRuleList.getRule(i);
                 regDest = outputRule.getRegDest();
-                T ans = this.eta;
+                T ans;
                 if(!outputRule.isEmptyRule()) {
                     T finalChange = outputRule.getChange();
                     Integer[] finalRegsOrder = outputRule.getRegisters();
                     ans = superApply(finalRegsOrder, finalRegsState, finalChange);
-
                 } else{
                     ans = ((EmptyRule<T>)outputRule).getEta();
                 }
                 setRegisters(regDest, ans);
+                finalOutputRegsVal.add(getRegisters().get(regDest));
             }
-            ArrayList<T> finalRegsVal = new ArrayList<>();
-            finalRegsVal.addAll(getRegisters());
 
            //don't forget to reset the automaton!!!!
             resetRegs();
-            return finalRegsVal;
+//            System.out.println("I'm inside!");
+//            String ans = "";
+//            for (int i = 0; i < finalOutputRegsVal.size() - 1; i++) {
+//                ans = ans + "r" + i + "=" + finalOutputRegsVal.get(i) + ", ";
+//            }
+//            ans = ans + "r" + (finalOutputRegsVal.size() - 1) + "=" + finalOutputRegsVal.get(finalOutputRegsVal.size() - 1);
+//            System.out.println(ans);
+            return finalOutputRegsVal;
         }
-        else return null;
+        else {
+            resetRegs();
+            return null;
+        }
     }
 
     //computes the next configuration according to current configuration and the current letter being read
@@ -261,6 +276,13 @@ abstract public class CRA<T,K> extends DFA<K>{
             }
             copyOfRegsState.set(regDest, newVal);
         }
+//        System.out.println("I'm inside eval!");
+//        String ans = "";
+//        for (int k = 0; k < copyOfRegsState.size() - 1; k++) {
+//            ans = ans + "r" + k + "=" + copyOfRegsState.get(k) + ", ";
+//        }
+//        ans = ans + "r" + (copyOfRegsState.size() - 1) + "=" + copyOfRegsState.get(copyOfRegsState.size() - 1);
+//        System.out.println(ans);
         return new Configuration<>(nextState,copyOfRegsState);
     }
 
@@ -286,7 +308,7 @@ abstract public class CRA<T,K> extends DFA<K>{
         }
     }
 
-    protected void resetRegs(){
+    public void resetRegs(){
         for(int i=0; i<this.Registers.size(); i++){
             this.Registers.set(i,this.eta);
         }

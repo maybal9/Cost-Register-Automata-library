@@ -87,7 +87,7 @@ public class ACRAMaker {
     }
 
     private UpdateRuleList<Integer> buildUpdateRuleList(String[] rules){
-        UpdateRuleList<Integer> ans = new UpdateRuleList<>(this.numOfRegs);
+        UpdateRuleList<Integer> ans = new UpdateRuleList<>(rules.length);
         Rule<Integer> r;
         for(int i=0; i<rules.length; i++){
             r = p.parseRule(rules[i]);

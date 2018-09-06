@@ -84,10 +84,11 @@ public class UpdateRuleList<T> {
         return new UpdateRuleList<>(a);
     }
 
-    public void resetFromTo(int start, int end, T eta){
-        for(int i=start; i<end; i++){
-            this.updateRegsRules[i] = new EmptyRule<T>(updateRegsRules[i].getRegDest(),eta);
-        }
+    public UpdateRuleList<T> trim(int start, int end){
+        int numToCopy = end - start;
+        Rule<T>[] ans = new Rule[numToCopy];
+        System.arraycopy(this.updateRegsRules, start, ans, 0, numToCopy);
+        return new UpdateRuleList<>(ans);
     }
 
     public String printURL(){
